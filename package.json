@@ -1,0 +1,25 @@
+{
+  "name": "shelldojo",
+  "version": "2.4.0",
+  "description": "ShellDojo: Terminal Academy & Panic Arena - Interactive CLI learning & speedrun platform",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node --test tests/validator.test.js"
+  },
+  "keywords": [
+    "cli",
+    "terminal",
+    "linux",
+    "git",
+    "docker",
+    "sysadmin",
+    "devops",
+    "education",
+    "cyberpunk"
+  ],
+  "author": "ShellDojo Engineering",
+  "license": "MIT"
+}
+

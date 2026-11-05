@@ -1,0 +1,2061 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShellDojo // Terminal Academy & Panic Arena</title>
+  <meta name="description" content="Aprende comandos de Git, Linux, Docker y Redes paso a paso sin reloj en el Modo Dojo, o compite a contrarreloj en la Panic Arena." />
+  <meta name="theme-color" content="#070a0e" />
+
+  <!-- Open Graph / Twitter Cards -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="ShellDojo // Terminal Academy & Panic Arena" />
+  <meta property="og:description" content="Entrena comandos reales desde cero y sobrevive a emergencias de servidor en 15 segundos." />
+  <meta property="og:image" content="./assets/og-banner.svg" />
+
+  <!-- Favicon & PWA Manifest -->
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+
+  <!-- Google Fonts: JetBrains Mono & Share Tech Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            crtBg: 'var(--bg-console)',
+            crtPanel: 'var(--bg-panel)',
+            crtBorder: 'var(--border-panel)',
+            neonGreen: 'var(--neon-green)',
+            neonAmber: 'var(--neon-amber)',
+            neonCyan: 'var(--neon-cyan)',
+            neonRed: '#ff3333',
+            neonPurple: '#c084fc'
+          },
+          fontFamily: {
+            mono: ['"JetBrains Mono"', 'monospace'],
+            display: ['"Share Tech Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Estilos Personalizados -->
+  <link rel="stylesheet" href="./css/main.css" />
+  <link rel="stylesheet" href="./css/crt-effects.css" />
+</head>
+<body class="bg-crtBg text-slate-200 font-mono min-h-screen flex flex-col selection:bg-neonGreen selection:text-black overflow-x-hidden">
+
+  <!-- Superposición CRT (Scanlines + Viñeta) -->
+  <div class="crt-overlay pointer-events-none fixed inset-0 z-50"></div>
+
+  <!-- ========================================================================
+       HEADER SUPERIOR (HUD + NAVEGACIÓN CONTEXTUAL)
+       ======================================================================== -->
+  <header class="sticky top-0 z-40 bg-crtPanel/95 backdrop-blur-md border-b border-crtBorder px-4 py-3 shadow-lg">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Logo & Identidad -->
+      <div class="flex items-center gap-3 cursor-pointer" id="brand-logo" title="Ir al Inicio / Dashboard">
+        <div class="w-10 h-10 rounded bg-black border border-neonGreen flex items-center justify-center shadow-neon-green">
+          <span class="text-neonGreen font-bold text-lg tracking-tighter">&gt;_</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-display text-xl tracking-wider text-white font-bold">
+              SHELL<span class="text-neonGreen">DOJO</span>
+            </h1>
+            <span id="hud-plan-badge" class="text-[10px] px-1.5 py-0.5 rounded bg-neonGreen/10 text-neonGreen border border-neonGreen/40 uppercase tracking-widest font-bold">
+              CADET
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">Terminal Academy &amp; Panic Arena</p>
+        </div>
+      </div>
+
+      <!-- Navegación Pública (Visible cuando NO ha iniciado sesión) -->
+      <nav id="public-nav" class="flex flex-wrap items-center gap-2">
+        <button data-public-nav="landing" class="px-3 py-1.5 rounded text-xs sm:text-sm text-slate-300 hover:text-white transition-colors">
+          Qué Aprenderás
+        </button>
+        <button data-public-nav="feedback" class="px-3 py-1.5 rounded text-xs sm:text-sm text-neonGreen hover:text-white transition-colors font-semibold">
+          💬 Opiniones
+        </button>
+        <button data-public-nav="verify" class="px-3 py-1.5 rounded text-xs sm:text-sm text-neonCyan hover:text-white transition-colors font-semibold">
+          🔎 Verificar Certificado
+        </button>
+        <button data-public-nav="leaderboard" class="px-3 py-1.5 rounded text-xs sm:text-sm text-slate-300 hover:text-white transition-colors">
+          🏆 Ranking
+        </button>
+        <button data-public-nav="pricing" class="px-3 py-1.5 rounded text-xs sm:text-sm text-neonAmber hover:text-white transition-colors font-semibold">
+          💎 Planes PRO
+        </button>
+        <button data-public-nav="login" class="px-3.5 py-1.5 rounded text-xs sm:text-sm bg-black border border-crtBorder hover:border-neonCyan text-neonCyan font-bold transition-all">
+          Iniciar Sesión
+        </button>
+        <button data-public-nav="register" class="px-4 py-1.5 rounded text-xs sm:text-sm bg-neonGreen text-black font-bold hover:bg-neonGreen/90 transition-all shadow-neon-green">
+          Crear Cuenta Gratis
+        </button>
+      </nav>
+
+      <!-- Pestañas del Dashboard (Visibles al iniciar sesión) -->
+      <nav id="app-nav" class="hidden flex-wrap items-center gap-1 bg-black/60 p-1 rounded border border-crtBorder" aria-label="Navegación Principal">
+        <button data-nav="academy" class="nav-tab active-tab px-2.5 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1">
+          <span>[01]</span> <span>Dashboard</span>
+        </button>
+        <button data-nav="settings" class="nav-tab px-2.5 py-1.5 rounded text-xs font-bold transition-all flex items-center gap-1 text-neonGreen border border-neonGreen/40 bg-neonGreen/10">
+          <span>⚙️</span> <span>Mi Perfil &amp; Ajustes</span>
+        </button>
+        <button data-nav="feedback" class="nav-tab px-2.5 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1 text-neonGreen">
+          <span>💬</span> <span>Opiniones</span>
+        </button>
+        <button data-nav="dojo" class="nav-tab px-2.5 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1">
+          <span>[02]</span> <span>Dojo</span>
+        </button>
+        <button data-nav="arena" class="nav-tab px-2.5 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1">
+          <span>[03]</span> <span>Panic Arena</span>
+        </button>
+        <button data-nav="boss" class="nav-tab px-2.5 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1 text-neonRed">
+          <span>👹</span> <span>Jefe</span>
+        </button>
+        <button data-nav="duel" class="nav-tab px-2.5 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1 text-neonAmber">
+          <span>⚔️</span> <span>Duelo 1v1</span>
+        </button>
+        <button data-nav="bounties" class="nav-tab px-2.5 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1">
+          <span>🎯</span> <span>Misiones</span>
+        </button>
+        <button data-nav="portfolio" class="nav-tab px-2.5 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1 text-neonGreen">
+          <span>📄</span> <span>Portafolio/CV</span>
+        </button>
+        <button data-nav="leaderboard" class="nav-tab px-2.5 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1">
+          <span>🏆</span> <span>Ranking</span>
+        </button>
+        <button data-nav="verify" class="nav-tab px-2.5 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1 text-neonCyan">
+          <span>🔎</span> <span>Verificar</span>
+        </button>
+        <button data-nav="cheatsheet" class="nav-tab px-2.5 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1">
+          <span>📘</span> <span>Diccionario &amp; Estudio</span>
+        </button>
+        <button data-nav="pricing" class="nav-tab px-2.5 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1 text-neonAmber">
+          <span>💎</span> <span>Planes</span>
+        </button>
+      </nav>
+
+      <!-- Estado del Jugador (HUD Derecha) -->
+      <div class="flex items-center gap-2 sm:gap-3 text-xs">
+        <div id="hud-stats-group" class="hidden flex-wrap items-center gap-2">
+          <button
+            id="btn-hud-profile"
+            type="button"
+            title="Haz clic para cambiar Foto de Perfil, Temas, Sensibilidad y Seguridad"
+            class="bg-neonGreen/15 hover:bg-neonGreen/25 border border-neonGreen px-2.5 py-1 rounded flex items-center gap-2 transition-all shadow-neon-green"
+          >
+            <span id="hud-user-avatar" class="w-6 h-6 rounded-full bg-neonGreen/20 border border-neonGreen flex items-center justify-center text-sm overflow-hidden">
+              🥷
+            </span>
+            <span id="hud-user-handle" class="font-bold text-white">@operador</span>
+            <span class="text-[10px] text-neonGreen font-bold">⚙️ Perfil</span>
+            <span id="hud-security-badge" class="hidden text-[10px] px-1.5 py-0.5 rounded bg-neonGreen/20 text-neonGreen border border-neonGreen/50 font-bold" title="Cuenta PRO Verificada con 2FA">
+              🛡️ 2FA
+            </span>
+          </button>
+
+          <div class="bg-black/60 border border-crtBorder px-2.5 py-1.5 rounded flex items-center gap-1.5">
+            <span class="text-slate-400">RANGO:</span>
+            <span id="hud-rank" class="font-bold text-neonCyan">Novato</span>
+          </div>
+
+          <div class="bg-black/60 border border-crtBorder px-2.5 py-1.5 rounded flex items-center gap-1.5">
+            <span class="text-slate-400">XP:</span>
+            <span id="hud-xp" class="font-bold text-neonGreen">0</span>
+          </div>
+
+          <div class="bg-black/60 border border-crtBorder px-2 py-1.5 rounded flex items-center gap-1" title="Racha diaria">
+            <span class="text-neonAmber">🔥</span>
+            <span id="hud-streak" class="font-bold text-neonAmber">1d</span>
+          </div>
+        </div>
+
+        <button id="btn-audio-toggle" class="bg-black/60 hover:bg-crtBorder border border-crtBorder px-2.5 py-1.5 rounded text-neonGreen transition-colors" title="Activar/Silenciar Audio">
+          🔊 SFX
+        </button>
+
+        <button id="btn-logout" class="hidden bg-neonRed/15 hover:bg-neonRed/30 border border-neonRed/40 text-neonRed px-2.5 py-1.5 rounded font-bold transition-colors" title="Cerrar Sesión">
+          Salir
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL DE VISTAS -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
+
+    <!-- ==========================================
+         VISTA 0: PORTADA DE INICIO (QUÉ APRENDERÁS)
+         ========================================== -->
+    <section id="view-landing" class="view-section space-y-12 py-4">
+      
+      <!-- Hero Principal -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-crtPanel border border-crtBorder rounded-xl p-6 sm:p-10 shadow-panel relative overflow-hidden">
+        <div class="lg:col-span-7 space-y-5">
+          <div class="inline-flex items-center gap-2 text-xs font-bold text-neonGreen bg-neonGreen/10 border border-neonGreen/40 px-3 py-1 rounded-full">
+            <span>⚡</span> <span>ACADEMIA INTERACTIVA DE TERMINAL &amp; SIMULADOR SRE</span>
+          </div>
+          <h2 class="text-3xl sm:text-5xl font-bold text-white leading-tight tracking-tight">
+            De cero en consola a <span class="text-neonGreen glow-green">Ingeniero DevOps</span> bajo presión.
+          </h2>
+          <p class="text-sm sm:text-base text-slate-300 leading-relaxed">
+            Olvídate de memorizar teoría aburrida. En <strong>ShellDojo</strong> aprenderás paso a paso cómo se estructura cada comando real, practicarás en una terminal simulada con guías anti-frustración y luego defenderás servidores en producción a contrarreloj.
+          </p>
+          <div class="flex flex-wrap gap-3 pt-2">
+            <button id="btn-hero-start" class="px-6 py-3.5 rounded-lg bg-neonGreen text-black font-bold text-sm hover:bg-neonGreen/90 transition-all shadow-neon-green">
+              🚀 Empezar a Entrenar Gratis &rarr;
+            </button>
+          </div>
+          <div class="flex flex-wrap items-center gap-6 pt-3 text-xs text-slate-400">
+            <span>✔ Sin tarjetas de crédito para el plan Cadet</span>
+            <span>✔ Simulador seguro en el navegador</span>
+            <span>✔ Certificados verificables</span>
+          </div>
+        </div>
+
+        <!-- Vista previa interactiva de Anatomía en el Hero -->
+        <div class="lg:col-span-5 bg-black border border-crtBorder rounded-lg overflow-hidden shadow-neon-green">
+          <div class="bg-crtPanel px-4 py-2.5 border-b border-crtBorder flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-neonRed inline-block"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-neonAmber inline-block"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-neonGreen inline-block"></span>
+            </div>
+            <span class="text-[11px] text-slate-400">vista-previa-anatomia.sh</span>
+          </div>
+          <div class="p-5 space-y-4 text-xs">
+            <div class="text-slate-400"># Así desglosamos cada comando antes de que lo escribas:</div>
+            <div class="bg-crtPanel border border-crtBorder p-3 rounded font-bold text-sm text-white">
+              $ <span class="text-neonGreen">docker</span> <span class="text-neonAmber">run</span> <span class="text-neonCyan">-d -p 8080:80</span> <span class="text-neonPurple">nginx</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="token-badge token-executable">
+                <strong>[docker]</strong>
+                <span>Ejecutable CLI base</span>
+              </div>
+              <div class="token-badge token-subcommand">
+                <strong>[run]</strong>
+                <span>Subcomando creador</span>
+              </div>
+              <div class="token-badge token-flag">
+                <strong>[-d -p 8080:80]</strong>
+                <span>Segundo plano + Puerto</span>
+              </div>
+              <div class="token-badge token-argument">
+                <strong>[nginx]</strong>
+                <span>Imagen oficial objetivo</span>
+              </div>
+            </div>
+            <div class="border-t border-crtBorder pt-3 text-neonGreen">
+              ✔ Output simulado realista + Ghost Hint con tecla [Tab]
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN: ¿QUÉ VAS A APRENDER? (7 RUTAS TEMÁTICAS • 42 NIVELES • 630 EJERCICIOS) -->
+      <div class="space-y-6">
+        <div class="text-center max-w-3xl mx-auto space-y-2">
+          <span class="text-xs font-bold uppercase tracking-widest text-neonCyan">PROGRAMA DE ESTUDIOS DE 42 NIVELES (630 EJERCICIOS)</span>
+          <h3 class="text-2xl sm:text-3xl font-bold text-white">¿Qué vas a aprender en ShellDojo?</h3>
+          <p class="text-sm text-slate-400">
+            El <strong>Plan Gratis (Cadet)</strong> incluye <strong>14 niveles completos (210 ejercicios)</strong> en 5 áreas prácticas. Los planes de pago suman más niveles y rutas avanzadas.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Ruta 1 -->
+          <div class="bg-crtPanel border border-crtBorder rounded-xl p-5 space-y-2.5 shadow-panel">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-neonGreen/15 text-neonGreen border border-neonGreen/40">
+                01 • GIT &amp; GITHUB
+              </span>
+              <span class="text-[11px] text-slate-400">3 Niveles • 45 Retos</span>
+            </div>
+            <h4 class="text-base font-bold text-white">Git, Ramas &amp; GitHub</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Desde `git init`, Staging y commits hasta ramas, fusiones, `stash`, remotos y flujo colaborativo en GitHub.
+            </p>
+          </div>
+
+          <!-- Ruta 2 -->
+          <div class="bg-crtPanel border border-crtBorder rounded-xl p-5 space-y-2.5 shadow-panel">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-neonCyan/15 text-neonCyan border border-neonCyan/40">
+                02 • POWERSHELL
+              </span>
+              <span class="text-[11px] text-slate-400">3 Niveles • 45 Retos</span>
+            </div>
+            <h4 class="text-base font-bold text-white">PowerShell Moderno</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Cmdlets Verbo-Sustantivo: `Get-ChildItem`, `Get-Process`, `Get-Service`, `Test-Connection`, `Copy-Item` y ayuda con `Get-Help`.
+            </p>
+          </div>
+
+          <!-- Ruta 3 -->
+          <div class="bg-crtPanel border border-crtBorder rounded-xl p-5 space-y-2.5 shadow-panel">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-neonAmber/15 text-neonAmber border border-neonAmber/40">
+                03 • GESTORES DE PAQUETES
+              </span>
+              <span class="text-[11px] text-slate-400">3 Niveles • 45 Retos</span>
+            </div>
+            <h4 class="text-base font-bold text-white">Winget, Chocolatey, PNPM &amp; NVM</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Instala y actualiza programas desde la consola (`winget upgrade --all`), gestiona dependencias con `pnpm`, `yarn` y versiones de Node con `nvm`.
+            </p>
+          </div>
+
+          <!-- Ruta 4 -->
+          <div class="bg-crtPanel border border-crtBorder rounded-xl p-5 space-y-2.5 shadow-panel">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-500/15 text-neonPurple border border-purple-500/40">
+                04 • COMPRESIÓN &amp; HERRAMIENTAS CLI
+              </span>
+              <span class="text-[11px] text-slate-400">3 Niveles • 45 Retos</span>
+            </div>
+            <h4 class="text-base font-bold text-white">Tar, Zip, JQ, Sed &amp; Vim</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Crea respaldos `tar -czvf`, procesa JSON con `jq`, compara con `diff`, reemplaza texto con `sed` y edita archivos con Nano y Vim.
+            </p>
+          </div>
+
+          <!-- Ruta 5 -->
+          <div class="bg-crtPanel border border-crtBorder rounded-xl p-5 space-y-2.5 shadow-panel">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-neonGreen/15 text-neonGreen border border-neonGreen/40">
+                05 • APIS WEB &amp; DNS
+              </span>
+              <span class="text-[11px] text-slate-400">2 Niveles • 30 Retos</span>
+            </div>
+            <h4 class="text-base font-bold text-white">cURL, Wget, Dig &amp; Whois</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Consume APIs REST (`curl -X POST`), descarga archivos con `wget`, e inspecciona dominios con `dig` y `whois` sin abrir el navegador.
+            </p>
+          </div>
+
+          <!-- Ruta 6 -->
+          <div class="bg-crtPanel border border-crtBorder rounded-xl p-5 space-y-2.5 shadow-panel">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-neonCyan/15 text-neonCyan border border-neonCyan/40">
+                06 • RUTAS AVANZADAS
+              </span>
+              <span class="text-[11px] text-slate-400">28 Niveles • 420 Retos</span>
+            </div>
+            <h4 class="text-base font-bold text-white">Linux, Docker, SQL, Python &amp; Seguridad</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Al activar un plan de pago sumas rutas profesionales de administración Linux, contenedores, bases de datos, backend y ciberseguridad.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN: METODOLOGÍA EN 3 ETAPAS -->
+      <div class="bg-crtPanel border border-crtBorder rounded-xl p-6 sm:p-8 space-y-6">
+        <div class="text-center max-w-2xl mx-auto">
+          <h3 class="text-xl sm:text-2xl font-bold text-white">Metodología de Entrenamiento en 3 Fases</h3>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">Diseñado científicamente para construir memoria muscular real.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs sm:text-sm">
+          <div class="bg-black/60 border border-crtBorder p-5 rounded-lg space-y-2">
+            <span class="text-neonGreen font-bold text-base">01. Modo Dojo (Sin Reloj)</span>
+            <p class="text-slate-300">Aprende a tu propio ritmo con teoría directa, anatomía por colores y el botón <strong>Mostrar Guía [Tab]</strong> si te bloqueas.</p>
+          </div>
+          <div class="bg-black/60 border border-crtBorder p-5 rounded-lg space-y-2">
+            <span class="text-neonRed font-bold text-base">02. Panic Arena (15 Segundos)</span>
+            <p class="text-slate-300">3 nodos de servidor (vidas) y emergencias reales a contrarreloj con reporte Post-Mortem detallado de tus errores.</p>
+          </div>
+          <div class="bg-black/60 border border-crtBorder p-5 rounded-lg space-y-2">
+            <span class="text-neonAmber font-bold text-base">03. Misiones Diarias &amp; Rangos</span>
+            <p class="text-slate-300">Completa encargos extra (Daily Bounties), sube desde <em>Novato</em> hasta <em>Kernel God</em> y desbloquea certificados.</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==========================================
+         VISTA AUTH: LOGIN & REGISTER (PERFIL EXTENDIDO PARA CERTIFICADO)
+         ========================================== -->
+    <section id="view-auth" class="view-section hidden py-6">
+      <div class="max-w-xl mx-auto bg-crtPanel border border-crtBorder rounded-xl overflow-hidden shadow-panel">
+        <!-- Selector Login / Registro -->
+        <div class="grid grid-cols-2 border-b border-crtBorder bg-black/60 text-xs font-bold">
+          <button id="tab-auth-login" type="button" class="py-3.5 text-center border-b-2 border-neonGreen text-neonGreen bg-neonGreen/10">
+            INICIAR SESIÓN
+          </button>
+          <button id="tab-auth-register" type="button" class="py-3.5 text-center border-b-2 border-transparent text-slate-400 hover:text-white">
+            REGISTRO PROFESIONAL
+          </button>
+        </div>
+
+        <div class="p-6 space-y-5">
+          <!-- Mensaje de alerta / error -->
+          <div id="auth-error-box" class="hidden p-3 rounded bg-neonRed/15 border border-neonRed text-neonRed text-xs font-semibold"></div>
+
+          <!-- FORMULARIO LOGIN -->
+          <form id="form-login" class="space-y-4" autocomplete="off">
+            <div>
+              <label class="block text-xs text-slate-400 uppercase mb-1">Correo del Operador</label>
+              <input
+                id="login-email"
+                type="email"
+                required
+                placeholder="tucorreo@gmail.com"
+                class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3.5 py-2.5 text-sm text-white focus:outline-none"
+              />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 uppercase mb-1">Clave de Acceso</label>
+              <input
+                id="login-password"
+                type="password"
+                required
+                placeholder="••••••••"
+                class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3.5 py-2.5 text-sm text-white focus:outline-none"
+              />
+            </div>
+            <button type="submit" class="w-full py-3 rounded bg-neonGreen text-black font-bold text-xs uppercase tracking-wider hover:bg-neonGreen/90 transition-all shadow-neon-green">
+              Autenticar y Entrar al Dashboard &rarr;
+            </button>
+          </form>
+
+          <!-- FORMULARIO REGISTRO EXTENDIDO (SIN DIRECCIÓN FÍSICA, DISEÑADO PARA EL CERTIFICADO OFICIAL) -->
+          <form id="form-register" class="hidden space-y-4" autocomplete="off">
+            <div class="bg-neonCyan/10 border border-neonCyan/30 rounded p-3 text-[11px] text-slate-300">
+              🎓 <strong class="text-neonCyan">Datos Oficiales de Certificación:</strong> Esta información aparecerá impresa en tus certificados oficiales de ShellDojo (No solicitamos dirección de domicilio).
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] text-slate-400 uppercase mb-1">Nombres y Apellidos *</label>
+                <input
+                  id="reg-name"
+                  type="text"
+                  required
+                  placeholder="Ej: Camilo Andrés Gómez"
+                  class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-xs sm:text-sm text-white focus:outline-none"
+                />
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 uppercase mb-1">Alias / Handle en Terminal *</label>
+                <input
+                  id="reg-handle"
+                  type="text"
+                  required
+                  placeholder="Ej: camilo_sre"
+                  class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-xs sm:text-sm text-white focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <!-- Documento de Identidad (Para el Certificado) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-[11px] text-slate-400 uppercase mb-1">Tipo Documento *</label>
+                <select
+                  id="reg-doc-type"
+                  class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-xs text-white focus:outline-none"
+                >
+                  <option value="CC">CC - Cédula Ciudadanía</option>
+                  <option value="TI">TI - Tarjeta Identidad</option>
+                  <option value="CE">CE - Cédula Extranjería</option>
+                  <option value="PAS">Pasaporte / DNI</option>
+                </select>
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-[11px] text-slate-400 uppercase mb-1">Número de Documento *</label>
+                <input
+                  id="reg-doc-number"
+                  type="text"
+                  required
+                  placeholder="Ej: 1020845912"
+                  class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-xs sm:text-sm text-white focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <!-- Correo Gmail y Celular -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] text-slate-400 uppercase mb-1">Correo Gmail (Para Certificados) *</label>
+                <input
+                  id="reg-email"
+                  type="email"
+                  required
+                  placeholder="tucorreo@gmail.com"
+                  class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-xs sm:text-sm text-white focus:outline-none"
+                />
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 uppercase mb-1">Teléfono / WhatsApp *</label>
+                <input
+                  id="reg-phone"
+                  type="tel"
+                  required
+                  placeholder="Ej: 3004567890"
+                  class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-xs sm:text-sm text-white focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <!-- Universidad / Empresa y Cargo / Rol -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] text-slate-400 uppercase mb-1">Universidad / SENA / Empresa *</label>
+                <input
+                  id="reg-institution"
+                  type="text"
+                  required
+                  placeholder="Ej: SENA / Universidad Nacional"
+                  class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-xs sm:text-sm text-white focus:outline-none"
+                />
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 uppercase mb-1">Especialidad / Rol Profesional *</label>
+                <input
+                  id="reg-occupation"
+                  type="text"
+                  required
+                  placeholder="Ej: Estudiante Ing. Sistemas / DevOps"
+                  class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-xs sm:text-sm text-white focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <!-- País y Contraseña -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] text-slate-400 uppercase mb-1">País *</label>
+                <select
+                  id="reg-country"
+                  class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-xs text-white focus:outline-none"
+                >
+                  <option value="Colombia">🇨🇴 Colombia</option>
+                  <option value="México">🇲🇽 México</option>
+                  <option value="Argentina">🇦🇷 Argentina</option>
+                  <option value="Chile">🇨🇱 Chile</option>
+                  <option value="Perú">🇵🇪 Perú</option>
+                  <option value="España">🇪🇸 España</option>
+                  <option value="Otro">🌎 Otro País</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 uppercase mb-1">Contraseña de Acceso *</label>
+                <input
+                  id="reg-password"
+                  type="password"
+                  required
+                  placeholder="Mínimo 4 caracteres"
+                  class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-xs sm:text-sm text-white focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] text-slate-400 uppercase mb-1">Plan Inicial de Entrenamiento</label>
+              <select
+                id="reg-plan"
+                class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-xs text-white focus:outline-none"
+              >
+                <option value="free">Cadet (Gratis - 14 Niveles / 210 Ejercicios Multitema)</option>
+                <option value="pro">Pro Operator ($29.900 COP/mes - 28 Niveles / 420 Ejercicios)</option>
+                <option value="team">Cyber Squad ($99.900 COP/mes - Los 42 Niveles / 630 Ejercicios)</option>
+              </select>
+            </div>
+
+            <button type="submit" class="w-full py-3 rounded bg-neonGreen text-black font-bold text-xs uppercase tracking-wider hover:bg-neonGreen/90 transition-all shadow-neon-green">
+              Crear Perfil Oficial e Iniciar Entrenamiento &rarr;
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 1: DASHBOARD / ACADEMIA & MAPA DE RUTAS
+         ========================================== -->
+    <section id="view-academy" class="view-section hidden space-y-6">
+      <!-- Banner de Bienvenida del Dashboard + Acceso Directo a Mi Perfil y Configuración -->
+      <div class="bg-crtPanel border border-crtBorder rounded-xl p-6 relative overflow-hidden shadow-panel space-y-5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div class="flex items-start sm:items-center gap-4 max-w-2xl">
+            <div id="dashboard-avatar-box" class="shrink-0 cursor-pointer" title="Cambiar Foto de Perfil / Avatar">
+              <span class="w-16 h-16 rounded-full bg-neonGreen/20 border-2 border-neonGreen flex items-center justify-center text-3xl">
+                🥷
+              </span>
+            </div>
+            <div class="space-y-1.5">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center gap-1.5 text-xs text-neonGreen bg-neonGreen/10 border border-neonGreen/30 px-2.5 py-0.5 rounded">
+                  <span class="animate-pulse">●</span> SESIÓN ACTIVA
+                </span>
+                <span id="dashboard-plan-pill" class="text-xs px-2.5 py-0.5 rounded bg-neonCyan/15 text-neonCyan border border-neonCyan/40 font-bold">
+                  PLAN ACTIVO
+                </span>
+              </div>
+              <h2 id="dashboard-welcome-title" class="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                Bienvenido al Centro de Mando, Operador
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Aquí tienes todos los sistemas y niveles disponibles en tu cuenta listos para entrenar en el <span class="text-neonGreen font-semibold">Modo Dojo</span> o evaluar en la <span class="text-neonRed font-semibold">Panic Arena</span>.
+              </p>
+            </div>
+          </div>
+
+          <!-- Botones de Acción del Operador (Mi Perfil / Configuración Siempre Visible) -->
+          <div class="flex flex-wrap gap-2.5 shrink-0">
+            <button
+              id="btn-dashboard-settings"
+              type="button"
+              class="px-4 py-3 rounded-lg bg-neonGreen text-black hover:bg-neonGreen/90 font-bold text-xs sm:text-sm transition-all shadow-neon-green flex items-center gap-2"
+            >
+              <span>⚙️</span>
+              <span>Configurar Perfil, Foto &amp; Diseño</span>
+            </button>
+            <button
+              id="btn-dashboard-portfolio"
+              type="button"
+              class="px-4 py-3 rounded-lg bg-neonCyan/15 hover:bg-neonCyan text-neonCyan hover:text-black border border-neonCyan/50 font-bold text-xs sm:text-sm transition-all flex items-center gap-2"
+            >
+              <span>📄</span>
+              <span>Mi Portafolio / CV</span>
+            </button>
+            <button
+              id="btn-global-survival"
+              type="button"
+              class="px-4 py-3 rounded-lg bg-neonRed/15 hover:bg-neonRed/25 text-neonRed border border-neonRed font-bold text-xs sm:text-sm tracking-wide transition-all flex items-center justify-center gap-2"
+            >
+              <span>🚨</span>
+              <span>PANIC ARENA</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Barra de Progreso Global -->
+        <div class="pt-4 border-t border-crtBorder/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="text-slate-400">PROGRESO EN TUS SISTEMAS HABILITADOS:</span>
+            <span id="academy-Completion-stats" class="text-neonGreen font-bold">0 / 14 Niveles</span>
+          </div>
+          <div class="flex items-center gap-3 w-full sm:w-72">
+            <div class="w-full bg-black h-2 rounded-full overflow-hidden border border-crtBorder">
+              <div id="academy-global-bar" class="bg-neonGreen h-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <span id="academy-global-pct" class="text-neonGreen font-bold w-10 text-right">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid de Tarjetas de los Sistemas Habilitados en el Plan Actual -->
+      <div id="tracks-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Renderizado dinámicamente por renderer.js -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 2: MODO DOJO (ENTRENAMIENTO GUIADO)
+         ========================================== -->
+    <section id="view-dojo" class="view-section hidden">
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-4 bg-crtPanel border border-crtBorder px-4 py-3 rounded-lg">
+        <div class="flex items-center gap-3">
+          <button id="btn-dojo-back" class="text-xs px-2.5 py-1.5 rounded bg-black hover:bg-crtBorder border border-crtBorder text-slate-300 transition-colors">
+            &larr; Dashboard
+          </button>
+          <div>
+            <span id="dojo-track-badge" class="text-[11px] uppercase tracking-wider px-2 py-0.5 rounded bg-neonCyan/10 text-neonCyan border border-neonCyan/30">
+              RUTA
+            </span>
+            <h2 id="dojo-lesson-title" class="text-lg font-bold text-white mt-0.5">
+              Cargando lección...
+            </h2>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-slate-400">SIN LÍMITE DE TIEMPO</span>
+          <span id="dojo-step-counter" class="text-xs font-bold px-3 py-1 rounded bg-neonGreen/10 text-neonGreen border border-neonGreen/40">
+            PASO 1 DE 3
+          </span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- COLUMNA IZQUIERDA: Manual Táctico -->
+        <div class="lg:col-span-5 bg-crtPanel border border-crtBorder rounded-lg p-5 space-y-5 shadow-panel">
+          <div>
+            <h3 class="text-xs font-bold uppercase tracking-widest text-neonCyan mb-2 flex items-center gap-2">
+              <span>📘</span> <span>1. Manual Táctico</span>
+            </h3>
+            <p id="dojo-theory-text" class="text-sm text-slate-300 leading-relaxed bg-black/40 p-3.5 rounded border border-crtBorder">
+              Explicación teórica del concepto.
+            </p>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xs font-bold uppercase tracking-widest text-neonAmber flex items-center gap-2">
+                <span>🔬</span> <span>2. Anatomía del Comando</span>
+              </h3>
+              <span class="text-[10px] text-slate-400">Desglose sintáctico</span>
+            </div>
+            <div id="dojo-anatomy-box" class="bg-black/70 border border-crtBorder rounded p-3.5 space-y-3"></div>
+          </div>
+
+          <div>
+            <h3 class="text-xs font-bold uppercase tracking-widest text-neonGreen mb-2 flex items-center gap-2">
+              <span>🎯</span> <span>3. Secuencia de Misión</span>
+            </h3>
+            <div id="dojo-steps-list" class="space-y-2.5"></div>
+          </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: Simulador de Terminal Persistente -->
+        <div class="lg:col-span-7 flex flex-col bg-black border border-crtBorder rounded-lg overflow-hidden shadow-panel">
+          <div class="bg-crtPanel px-4 py-2.5 border-b border-crtBorder flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-neonRed/80 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-neonAmber/80 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-neonGreen/80 inline-block"></span>
+              <span id="dojo-terminal-title" class="ml-2 text-xs text-slate-400">bash — dojo-sandbox: ~/workspace</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="btn-dojo-ghost-hint" type="button" class="text-xs px-2.5 py-1 rounded bg-neonAmber/15 hover:bg-neonAmber/25 text-neonAmber border border-neonAmber/40 transition-colors">
+                💡 Mostrar Guía [Tab]
+              </button>
+              <button id="btn-dojo-clear" type="button" class="text-xs px-2 py-1 rounded bg-black hover:bg-crtBorder text-slate-400 border border-crtBorder transition-colors">
+                Limpiar Vista
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-neonGreen/5 border-b border-neonGreen/20 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span class="text-[10px] uppercase tracking-wider text-neonGreen font-bold block">ORDEN ACTUAL EN EJECUCIÓN:</span>
+              <p id="dojo-active-instruction" class="text-sm text-white font-medium">
+                Escribe el comando correspondiente...
+              </p>
+            </div>
+            <span id="dojo-ghost-status" class="text-[11px] text-neonAmber hidden shrink-0">
+              [Guía Fantasma Activa]
+            </span>
+          </div>
+
+          <div id="dojo-terminal-output" class="p-4 h-80 sm:h-96 overflow-y-auto space-y-2.5 text-sm font-mono"></div>
+
+          <form id="dojo-command-form" class="border-t border-crtBorder bg-crtPanel/70 p-3 flex items-center gap-2" autocomplete="off">
+            <span id="dojo-prompt-label" class="text-neonGreen font-bold text-xs sm:text-sm shrink-0 select-none">
+              student@dojo:~/app$
+            </span>
+            <input
+              id="dojo-command-input"
+              type="text"
+              spellcheck="false"
+              autocapitalize="off"
+              autocomplete="off"
+              placeholder="Escribe el comando aquí... (Tab para Guía)"
+              class="w-full bg-transparent text-white font-mono text-sm focus:outline-none placeholder:text-slate-600"
+            />
+            <button type="submit" class="px-3 py-1.5 rounded bg-neonGreen text-black font-bold text-xs hover:bg-neonGreen/90 transition-colors shrink-0">
+              EJECUTAR &crarr;
+            </button>
+          </form>
+
+          <div id="dojo-victory-banner" class="hidden bg-neonGreen/10 border-t border-neonGreen p-4">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h4 class="text-neonGreen font-bold text-base flex items-center gap-2">
+                  <span>✅</span> <span>¡LECCIÓN COMPLETADA CON ÉXITO!</span>
+                </h4>
+                <p class="text-xs text-slate-300 mt-0.5">
+                  Todos los comandos de esta secuencia han sido verificados y guardados en tu perfil.
+                </p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <button id="btn-dojo-certificate" type="button" class="px-4 py-2 rounded bg-neonAmber text-black font-bold text-xs hover:bg-neonAmber/90 transition-all">
+                  🎓 Obtener Certificado (Gmail / PDF)
+                </button>
+                <button id="btn-dojo-next-lesson" type="button" class="px-4 py-2 rounded bg-neonGreen text-black font-bold text-xs hover:bg-neonGreen/90 transition-all">
+                  Siguiente Nivel &rarr;
+                </button>
+                <button id="btn-dojo-go-exam" type="button" class="px-4 py-2 rounded bg-neonRed/20 text-neonRed border border-neonRed font-bold text-xs hover:bg-neonRed/30 transition-all">
+                  Ir al Examen Intensivo 🚨
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 3: MODO ARENA (PANIC ARENA CONTRARRELOJ)
+         ========================================== -->
+    <section id="view-arena" class="view-section hidden space-y-6">
+      <!-- ANUNCIO DE REGLAS DEL JUEGO ANTES DE INICIAR EL RELOJ -->
+      <div id="arena-intro-box" class="bg-crtPanel border-2 border-neonAmber rounded-2xl p-6 sm:p-8 space-y-6 shadow-neon-amber">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-crtBorder pb-4">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-neonAmber/20 text-neonAmber border border-neonAmber/40">
+              📋 BRIEFING TÁCTICO // LEE LAS REGLAS ANTES DE INICIAR
+            </span>
+            <h2 id="arena-intro-title" class="text-2xl sm:text-3xl font-extrabold text-white mt-2">
+              Reglas del Juego: Panic Arena Contrarreloj
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1">
+              El temporizador <strong>NO comenzará</strong> hasta que presiones el botón de inicio aquí abajo. Prepárate antes de entrar a producción.
+            </p>
+          </div>
+          <div class="bg-black border border-neonGreen/50 rounded-xl px-4 py-3 text-center shrink-0">
+            <span class="text-[10px] text-slate-400 uppercase block">TIEMPO POR RETO</span>
+            <span id="arena-intro-time-badge" class="text-2xl font-extrabold text-neonGreen">15.0s</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+          <div class="bg-black/80 border border-crtBorder rounded-xl p-4 space-y-1.5">
+            <div class="text-base font-bold text-neonGreen">🖥️ 1. Tres Vidas (Nodos)</div>
+            <p class="text-slate-300 leading-relaxed">
+              Inicias con <strong>3 nodos de servidor activos</strong>. Cada comando erróneo o tiempo agotado apaga un nodo. Si pierdes los 3, termina la partida.
+            </p>
+          </div>
+          <div class="bg-black/80 border border-crtBorder rounded-xl p-4 space-y-1.5">
+            <div class="text-base font-bold text-neonRed">⏱️ 2. Reloj Contrarreloj</div>
+            <p class="text-slate-300 leading-relaxed">
+              Tienes <strong>15 segundos por emergencia</strong> (puedes cambiar la sensibilidad a 22s en Ajustes). En los últimos 5 segundos sonará la alarma.
+            </p>
+          </div>
+          <div class="bg-black/80 border border-crtBorder rounded-xl p-4 space-y-1.5">
+            <div class="text-base font-bold text-neonAmber">🔥 3. Multiplicador Combo</div>
+            <p class="text-slate-300 leading-relaxed">
+              Cada respuesta correcta consecutiva sube tu multiplicador (<strong>x1, x2, x3...</strong>), aumentando tu puntaje y la XP ganada.
+            </p>
+          </div>
+          <div class="bg-black/80 border border-crtBorder rounded-xl p-4 space-y-1.5">
+            <div class="text-base font-bold text-neonCyan">💡 4. Pista de Rescate</div>
+            <p class="text-slate-300 leading-relaxed">
+              Si olvidas un comando, usa el botón <strong>"Solicitar Pista Táctica (-35 pts)"</strong> para ver una guía sin perder una vida.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-crtBorder">
+          <div class="text-xs text-slate-400">
+            💡 <strong>Tip:</strong> Puedes ajustar la velocidad del reloj (22s / 15s / 10s) en <span class="text-neonGreen font-bold">⚙️ Mi Perfil &amp; Ajustes</span>.
+          </div>
+          <button
+            id="btn-arena-start-now"
+            type="button"
+            class="w-full sm:w-auto px-8 py-4 rounded-xl bg-neonGreen text-black font-extrabold text-sm uppercase tracking-wider hover:bg-neonGreen/90 transition-all shadow-neon-green"
+          >
+            🚀 ¡Entendido, Empezar Partida Ahora! &rarr;
+          </button>
+        </div>
+      </div>
+
+      <!-- HUD DEL RELOJ Y VIDAS (OCULTO HASTA QUE EL USUARIO DA CLIC EN EMPEZAR) -->
+      <div id="arena-hud-box" class="hidden bg-crtPanel border border-crtBorder rounded-lg p-4 shadow-panel">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-3">
+          <div>
+            <span id="arena-mode-title" class="text-xs font-bold uppercase tracking-widest text-neonRed flex items-center gap-2">
+              <span class="animate-ping inline-flex h-2 w-2 rounded-full bg-neonRed"></span>
+              <span>PANIC ARENA // INCIDENTE EN PRODUCCIÓN</span>
+            </span>
+            <h2 id="arena-track-name" class="text-lg font-bold text-white mt-0.5">
+              Certificación Intensiva
+            </h2>
+          </div>
+
+          <div class="flex items-center gap-6">
+            <div>
+              <span class="text-[10px] text-slate-400 uppercase block">NODOS DE SERVIDOR</span>
+              <div id="arena-lives-container" class="flex items-center gap-1.5 mt-1"></div>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-slate-400 uppercase block">COMBO</span>
+              <span id="arena-combo" class="text-lg font-bold text-neonAmber">x1</span>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-slate-400 uppercase block">PUNTAJE</span>
+              <span id="arena-score" class="text-lg font-bold text-neonGreen">0000</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs">
+            <span class="text-slate-400">TIEMPO DE RESPUESTA SLA</span>
+            <span id="arena-timer-text" class="font-bold text-neonGreen">15.0s</span>
+          </div>
+          <div class="w-full h-3 bg-black rounded-full overflow-hidden border border-crtBorder">
+            <div id="arena-timer-bar" class="h-full bg-neonGreen transition-all duration-100" style="width: 100%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="arena-battle-box" class="hidden bg-black border-2 border-crtBorder rounded-lg overflow-hidden shadow-panel">
+        <div class="bg-crtPanel px-4 py-2.5 border-b border-crtBorder flex items-center justify-between">
+          <div class="flex items-center gap-2 text-xs text-slate-400">
+            <span class="text-neonRed">●</span>
+            <span>SSH SESSION: CRITICAL_PRIORITY</span>
+          </div>
+          <span id="arena-question-progress" class="text-xs font-bold text-neonCyan">
+            EMERGENCIA 1 / 5
+          </span>
+        </div>
+
+        <div class="p-6 space-y-6">
+          <div class="bg-neonRed/10 border border-neonRed/40 rounded-lg p-4">
+            <div class="text-xs font-bold text-neonRed uppercase tracking-wider mb-1">
+              🚨 ALERTA DEL SISTEMA MONITORIZADO:
+            </div>
+            <p id="arena-scenario-prompt" class="text-base sm:text-lg text-white font-semibold leading-snug">
+              Cargando escenario de emergencia...
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <button id="btn-arena-hint" type="button" class="text-xs px-3 py-1.5 rounded bg-neonAmber/15 hover:bg-neonAmber/25 text-neonAmber border border-neonAmber/40 transition-colors">
+              💡 Solicitar Pista Táctica (-35 pts)
+            </button>
+            <p id="arena-hint-display" class="text-xs text-neonAmber italic hidden"></p>
+          </div>
+
+          <form id="arena-command-form" class="bg-crtPanel border border-crtBorder rounded-lg p-3.5 flex items-center gap-2" autocomplete="off">
+            <span id="arena-prompt-prefix" class="text-neonRed font-bold text-xs sm:text-sm shrink-0 select-none">
+              root@prod-server:~/app#
+            </span>
+            <input
+              id="arena-command-input"
+              type="text"
+              spellcheck="false"
+              autocapitalize="off"
+              autocomplete="off"
+              placeholder="Ingresa el comando de rescate y presiona ENTER..."
+              class="w-full bg-transparent text-white font-mono text-sm sm:text-base focus:outline-none placeholder:text-slate-600"
+            />
+            <button type="submit" class="px-4 py-2 rounded bg-neonRed text-white font-bold text-xs hover:bg-neonRed/90 transition-colors shrink-0">
+              EJECUTAR
+            </button>
+          </form>
+
+          <div id="arena-last-feedback" class="text-xs font-mono min-h-[1.5rem] text-slate-400"></div>
+        </div>
+      </div>
+
+      <!-- PANTALLA POST-MORTEM -->
+      <div id="arena-postmortem-box" class="hidden bg-crtPanel border border-crtBorder rounded-lg p-6 space-y-6 shadow-panel">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-crtBorder pb-4">
+          <div>
+            <span id="pm-status-badge" class="text-xs font-bold uppercase px-2.5 py-1 rounded bg-neonGreen/20 text-neonGreen border border-neonGreen/40">
+              REPORTE POST-MORTEM
+            </span>
+            <h3 id="pm-title" class="text-2xl font-bold text-white mt-2">
+              Incidente Finalizado
+            </h3>
+            <p id="pm-subtitle" class="text-sm text-slate-400">
+              Resumen de rendimiento operativo en la terminal.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <div class="bg-black border border-crtBorder px-4 py-2.5 rounded text-center">
+              <span class="text-[10px] text-slate-400 block">PUNTAJE FINAL</span>
+              <span id="pm-final-score" class="text-xl font-bold text-neonGreen">0</span>
+            </div>
+            <div class="bg-black border border-crtBorder px-4 py-2.5 rounded text-center">
+              <span class="text-[10px] text-slate-400 block">COMBO MÁX</span>
+              <span id="pm-max-combo" class="text-xl font-bold text-neonAmber">x1</span>
+            </div>
+            <div class="bg-black border border-crtBorder px-4 py-2.5 rounded text-center">
+              <span class="text-[10px] text-slate-400 block">PRECISIÓN</span>
+              <span id="pm-accuracy" class="text-xl font-bold text-neonCyan">100%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-black/60 border border-crtBorder rounded p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <span class="text-xs text-slate-400 block mb-1">REGISTRO DE TELEMETRÍA (WORDLE LOG):</span>
+            <div id="pm-emoji-strip" class="text-xl tracking-widest"></div>
+          </div>
+          <div class="flex items-center gap-3">
+            <button id="btn-pm-share" type="button" class="px-4 py-2 rounded bg-neonCyan text-black font-bold text-xs hover:bg-neonCyan/90 transition-all">
+              📋 Compartir Resultado
+            </button>
+            <span id="pm-share-feedback" class="text-xs text-neonGreen hidden">¡Copiado!</span>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-neonAmber mb-3">
+            🔍 ANÁLISIS TÉCNICO DE INCIDENTES Y CORRECCIONES:
+          </h4>
+          <div id="pm-mistakes-list" class="space-y-3"></div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-crtBorder">
+          <button id="btn-pm-certificate" type="button" class="px-4 py-2 rounded bg-neonAmber text-black font-bold text-xs hover:bg-neonAmber/90 transition-all">
+            🎓 Reclamar Certificado Oficial (Gmail / PDF)
+          </button>
+          <button id="btn-pm-retry" type="button" class="px-4 py-2 rounded bg-neonRed text-white font-bold text-xs hover:bg-neonRed/90 transition-all">
+            🔄 Reintentar Arena
+          </button>
+          <button id="btn-pm-academy" type="button" class="px-4 py-2 rounded bg-black hover:bg-crtBorder text-slate-200 border border-crtBorder font-bold text-xs transition-all">
+            Volver al Dashboard
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 4: MISIONES EXTRA (DAILY BOUNTIES)
+         ========================================== -->
+    <section id="view-bounties" class="view-section hidden space-y-6">
+      <div class="bg-crtPanel border border-crtBorder rounded-lg p-6 shadow-panel flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-widest text-neonAmber">CONTRATOS DE OPERADOR // TAREAS EXTRA</span>
+          <h2 class="text-2xl font-bold text-white mt-1">Misiones Tácticas &amp; Daily Bounties</h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            Resuelve encargos puntuales de consola para ganar experiencia extra y canjearla en la Tienda XP.
+          </p>
+        </div>
+      </div>
+
+      <div id="bounties-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Renderizado por renderer.js -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 5: CHEATSHEET / DICCIONARIO & GUÍA DE ESTUDIO
+         ========================================== -->
+    <section id="view-cheatsheet" class="view-section hidden space-y-6">
+      <!-- NUEVA SECCIÓN: FORMAS DE ESTUDIAR, TIPS Y FLASHCARDS INTERACTIVAS -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Guía de Métodos de Estudio y Atajos -->
+        <div class="lg:col-span-7 bg-crtPanel border border-crtBorder rounded-xl p-5 shadow-panel space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-widest text-neonGreen">🧠 METODOLOGÍA SHELLDOJO</span>
+              <h3 class="text-lg font-bold text-white">Cómo Estudiar y Memorizar Comandos sin Olvidarlos</h3>
+            </div>
+          </div>
+          <div id="cheatsheet-study-guide" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Renderizado por renderer.js -->
+          </div>
+        </div>
+
+        <!-- Entrenador de Flashcards (Tarjetas de Estudio Rápido) -->
+        <div class="lg:col-span-5 bg-crtPanel border-2 border-neonCyan/60 rounded-xl p-5 shadow-panel flex flex-col justify-between space-y-4">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded bg-neonCyan/15 text-neonCyan border border-neonCyan/40">
+              ⚡ FLASHCARDS DE REPASO ACTIVO
+            </span>
+            <h3 class="text-lg font-bold text-white mt-2">Tarjetas de Autoevaluación Rápida</h3>
+            <p class="text-xs text-slate-400">
+              Piensa la respuesta antes de voltear la tarjeta para fortalecer tu memoria a largo plazo.
+            </p>
+          </div>
+
+          <div id="cheatsheet-flashcard-box" class="bg-black border border-crtBorder rounded-xl p-4 space-y-3">
+            <!-- Renderizado por renderer.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Buscador y Filtros del Diccionario -->
+      <div class="bg-crtPanel border border-crtBorder rounded-lg p-5 shadow-panel space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white">Diccionario Táctico &amp; Cheatsheet Completo</h2>
+            <p class="text-xs text-slate-400">
+              Consulta instantánea de comandos, anatomía por colores, tips de memorización y equivalencias válidas.
+            </p>
+          </div>
+
+          <div id="cheatsheet-category-filters" class="flex flex-wrap gap-1.5">
+            <button data-cat="all" class="cat-filter active-cat px-3 py-1 rounded text-xs font-bold border border-neonGreen bg-neonGreen/10 text-neonGreen">
+              Todas
+            </button>
+            <button data-cat="git" class="cat-filter px-3 py-1 rounded text-xs font-bold border border-crtBorder bg-black text-slate-400 hover:text-white">
+              Git
+            </button>
+            <button data-cat="powershell" class="cat-filter px-3 py-1 rounded text-xs font-bold border border-crtBorder bg-black text-slate-400 hover:text-white">
+              PowerShell
+            </button>
+            <button data-cat="pkg" class="cat-filter px-3 py-1 rounded text-xs font-bold border border-crtBorder bg-black text-slate-400 hover:text-white">
+              Winget/PNPM/NVM
+            </button>
+            <button data-cat="archiving" class="cat-filter px-3 py-1 rounded text-xs font-bold border border-crtBorder bg-black text-slate-400 hover:text-white">
+              Tar/Zip/JQ/Vim
+            </button>
+            <button data-cat="httpcli" class="cat-filter px-3 py-1 rounded text-xs font-bold border border-crtBorder bg-black text-slate-400 hover:text-white">
+              cURL/Wget/DNS
+            </button>
+            <button data-cat="linux" class="cat-filter hidden px-3 py-1 rounded text-xs font-bold border border-crtBorder bg-black text-slate-400 hover:text-white">Linux</button>
+            <button data-cat="docker" class="cat-filter hidden px-3 py-1 rounded text-xs font-bold border border-crtBorder bg-black text-slate-400 hover:text-white">Docker</button>
+            <button data-cat="windows" class="cat-filter hidden px-3 py-1 rounded text-xs font-bold border border-crtBorder bg-black text-slate-400 hover:text-white">Windows Server</button>
+            <button data-cat="sql" class="cat-filter hidden px-3 py-1 rounded text-xs font-bold border border-crtBorder bg-black text-slate-400 hover:text-white">SQL</button>
+            <button data-cat="dev" class="cat-filter hidden px-3 py-1 rounded text-xs font-bold border border-crtBorder bg-black text-slate-400 hover:text-white">Python/Node</button>
+            <button data-cat="sec" class="cat-filter hidden px-3 py-1 rounded text-xs font-bold border border-crtBorder bg-black text-slate-400 hover:text-white">Seguridad</button>
+          </div>
+        </div>
+
+        <div class="relative">
+          <input
+            id="cheatsheet-search-input"
+            type="text"
+            placeholder="Buscar comando por palabra clave (ej. checkout, winget, Get-Process, tar, curl, jq)..."
+            class="w-full bg-black border border-crtBorder focus:border-neonCyan rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none"
+          />
+        </div>
+      </div>
+
+      <div id="cheatsheet-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 5B: MODO JEFE FINAL (BOSS FIGHT ENCOUNTERS)
+         ========================================== -->
+    <section id="view-boss" class="view-section hidden space-y-6">
+      <div class="bg-crtPanel border-2 border-neonRed rounded-xl p-6 shadow-neon-red flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-widest text-neonRed flex items-center gap-2">
+            <span class="animate-ping inline-flex h-2 w-2 rounded-full bg-neonRed"></span>
+            <span>INCIDENTE DE NIVEL OMEGA // JEFE FINAL MULTI-FASE</span>
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">
+            Modo Jefe Final: Defensa Crítica en Vivo
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
+            Enfrenta ataques y caídas catastróficas de 5 fases consecutivas. Cada comando correcto reduce un <strong>20% la vida (HP) del Jefe</strong>. ¡Un solo error reinicia el escudo del Jefe! Al derrotarlo ganas XP masiva y tu <strong>Certificado de Victoria Boss Fight</strong>.
+          </p>
+        </div>
+        <div id="boss-selector-tabs" class="flex flex-wrap gap-2 shrink-0">
+          <!-- Renderizado por renderer.js -->
+        </div>
+      </div>
+
+      <!-- Contenedor interactivo del combate contra el Jefe -->
+      <div id="boss-arena-container">
+        <!-- Renderizado por renderer.js -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 5C: TABLA DE CLASIFICACIÓN (LEADERBOARD COLOMBIA & GLOBAL)
+         ========================================== -->
+    <section id="view-leaderboard" class="view-section hidden space-y-6">
+      <div class="bg-crtPanel border border-crtBorder rounded-xl p-6 shadow-panel flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-widest text-neonAmber">
+            🏆 RANKING OFICIAL DE OPERADORES // TEMPORADA 2026
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">
+            Tabla de Clasificación Colombia &amp; LATAM
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            Compite con desarrolladores, estudiantes universitarios, aprendices SENA e ingenieros DevOps sumando XP en el Dojo, Panic Arena y Jefes Finales.
+          </p>
+        </div>
+        <div id="leaderboard-user-summary" class="bg-black border border-neonGreen/50 rounded-lg px-4 py-3 text-right shrink-0">
+          <span class="text-[10px] text-slate-400 uppercase block">TU POSICIÓN ACTUAL</span>
+          <span id="leaderboard-my-rank" class="text-xl font-extrabold text-neonGreen">#--</span>
+        </div>
+      </div>
+
+      <div class="bg-crtPanel border border-crtBorder rounded-xl overflow-hidden shadow-panel">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs sm:text-sm">
+            <thead>
+              <tr class="bg-black border-b border-crtBorder text-[11px] uppercase tracking-wider text-slate-400">
+                <th class="py-3.5 px-4">Posición</th>
+                <th class="py-3.5 px-4">Operador</th>
+                <th class="py-3.5 px-4">Universidad / SENA / Empresa</th>
+                <th class="py-3.5 px-4">Rango &amp; Licencia</th>
+                <th class="py-3.5 px-4 text-center">Jefes</th>
+                <th class="py-3.5 px-4 text-right">XP Total</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-tbody" class="divide-y divide-crtBorder/60">
+              <!-- Renderizado por renderer.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 5C.2: BUZÓN DE OPINIONES & FEEDBACK DE CLIENTES
+         ========================================== -->
+    <section id="view-feedback" class="view-section hidden space-y-6 py-4">
+      <div class="max-w-3xl mx-auto bg-crtPanel border-2 border-neonGreen/60 rounded-2xl p-6 sm:p-8 shadow-neon-green space-y-6">
+        <div class="text-center space-y-2">
+          <span class="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-neonGreen/15 text-neonGreen border border-neonGreen/40">
+            💬 BUZÓN OFICIAL DE OPINIÓN Y SUGERENCIAS
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white pt-1">
+            ¿Qué opinas de ShellDojo? Déjanos tus sugerencias y comentarios
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto">
+            Comparte tus sugerencias de nuevos temas, tu experiencia aprendiendo terminal o reporta cualquier detalle. Tu comentario se envía directamente al equipo de ShellDojo para mejorar la plataforma.
+          </p>
+        </div>
+
+        <!-- Formulario de Opinión -->
+        <form id="form-client-feedback" class="space-y-5" autocomplete="off">
+          <!-- Calificación con estrellas -->
+          <div class="bg-black/70 border border-crtBorder rounded-xl p-4 text-center space-y-2">
+            <label class="block text-xs font-bold uppercase text-slate-300 tracking-wider">
+              Califica tu experiencia general con ShellDojo *
+            </label>
+            <div id="feedback-star-picker" class="flex items-center justify-center gap-2 text-3xl sm:text-4xl cursor-pointer select-none py-1">
+              <span data-star="1" class="star-item text-neonAmber hover:scale-125 transition-transform">★</span>
+              <span data-star="2" class="star-item text-neonAmber hover:scale-125 transition-transform">★</span>
+              <span data-star="3" class="star-item text-neonAmber hover:scale-125 transition-transform">★</span>
+              <span data-star="4" class="star-item text-neonAmber hover:scale-125 transition-transform">★</span>
+              <span data-star="5" class="star-item text-neonAmber hover:scale-125 transition-transform">★</span>
+            </div>
+            <p id="feedback-rating-label" class="text-xs font-bold text-neonAmber">5 de 5 estrellas — ¡Excelente plataforma!</p>
+            <input type="hidden" id="feedback-rating-val" value="5" />
+          </div>
+
+          <!-- Datos de contacto -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Tu Nombre o Alias *</label>
+              <input
+                id="feedback-input-name"
+                type="text"
+                required
+                placeholder="Ej: Daniel Gómez"
+                class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded-lg px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Tu Correo Electrónico *</label>
+              <input
+                id="feedback-input-email"
+                type="email"
+                required
+                placeholder="tu-correo@gmail.com"
+                class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded-lg px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
+              />
+              <span class="text-[10px] text-slate-500">Para responderte directamente a tu bandeja</span>
+            </div>
+          </div>
+
+          <!-- Categoría -->
+          <div>
+            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Categoría del Mensaje *</label>
+            <select
+              id="feedback-input-category"
+              class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded-lg px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none"
+            >
+              <option value="Sugerencia de Temas o Lecciones">💡 Sugerencia de Nuevos Temas o Lecciones (Docker, Linux, AWS, Git...)</option>
+              <option value="Experiencia de Usuario y Diseño">⚡ Experiencia de Usuario, Diseño o Facilidad de Uso</option>
+              <option value="Dificultad de los Ejercicios">🎯 Dificultad o Claridad de los Ejercicios Prácticos</option>
+              <option value="Felicitaciones y Reseña">🌟 Felicitaciones / Testimonio Positivo</option>
+              <option value="Reporte de Error o Problema">🐞 Reportar un Error o Problema Técnico</option>
+              <option value="Otra Consulta">❓ Otra Consulta o Pregunta General</option>
+            </select>
+          </div>
+
+          <!-- Mensaje / Opinión -->
+          <div>
+            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Tu Opinión, Sugerencia o Comentario Detallado *</label>
+            <textarea
+              id="feedback-input-message"
+              required
+              rows="4"
+              placeholder="Cuéntanos con total confianza qué te pareció la plataforma, qué temas te gustaría aprender, qué mejorarías o qué fue lo que más te gustó..."
+              class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded-lg px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none resize-y"
+            ></textarea>
+          </div>
+
+          <!-- Destinatario de correo -->
+          <div class="bg-black/60 border border-crtBorder rounded-lg p-3 flex items-center justify-between gap-3 text-xs text-slate-400">
+            <div class="flex items-center gap-2">
+              <span class="text-base">📬</span>
+              <span>Buzón oficial de soporte y sugerencias:</span>
+            </div>
+            <strong id="feedback-target-email-display" class="text-neonCyan font-mono">soporteshelldojo@gmail.com</strong>
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="flex flex-col sm:flex-row gap-3 pt-2">
+            <button
+              type="submit"
+              id="btn-feedback-submit"
+              class="flex-1 py-3 px-5 rounded-lg bg-neonGreen hover:bg-neonGreen/90 text-black font-bold text-xs sm:text-sm uppercase tracking-wider transition-all shadow-neon-green flex items-center justify-center gap-2"
+            >
+              <span>📨</span>
+              <span>Enviar Opinión &amp; Notificar al Correo</span>
+            </button>
+            <button
+              type="button"
+              id="btn-feedback-gmail-direct"
+              class="py-3 px-5 rounded-lg bg-black hover:bg-neonCyan/15 text-neonCyan border border-neonCyan/50 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+            >
+              <span>📧</span>
+              <span>Abrir en Gmail</span>
+            </button>
+          </div>
+
+          <!-- Feedback de éxito -->
+          <div id="feedback-success-banner" class="hidden bg-neonGreen/10 border-2 border-neonGreen rounded-xl p-4 text-center space-y-1">
+            <div class="text-neonGreen font-bold text-sm">✔ ¡Muchas gracias por tu opinión!</div>
+            <p class="text-xs text-slate-300">
+              Tu mensaje ha quedado registrado en ShellDojo y se ha preparado la notificación hacia el equipo de soporte.
+            </p>
+          </div>
+        </form>
+
+        <!-- Testimonios de la Comunidad -->
+        <div class="border-t border-crtBorder pt-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-neonAmber flex items-center gap-1.5">
+              <span>⭐</span> Reseñas &amp; Opiniones Recientes de Estudiantes
+            </h3>
+            <span class="text-[11px] text-slate-500">Comunidad ShellDojo</span>
+          </div>
+
+          <div id="feedback-community-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <!-- Renderizado dinámico de opiniones -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 5D: PÁGINA PÚBLICA DE VERIFICACIÓN DE CERTIFICADOS
+         ========================================== -->
+    <section id="view-verify" class="view-section hidden space-y-6 py-4">
+      <div class="max-w-3xl mx-auto bg-crtPanel border-2 border-neonCyan/60 rounded-2xl p-6 sm:p-8 shadow-panel space-y-6">
+        <div class="text-center space-y-2">
+          <span class="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-neonCyan/15 text-neonCyan border border-neonCyan/40">
+            🔍 VALIDADOR PÚBLICO PARA EMPRESAS Y RECLUTADORES
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white pt-1">
+            Verificación Oficial de Certificados ShellDojo
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
+            Ingresa el código único del diploma (el que aparece impreso en el certificado) para comprobar su autenticidad, documento del titular, institución y competencias aprobadas.
+          </p>
+        </div>
+
+        <form id="form-verify-certificate" class="flex flex-col sm:flex-row gap-3" autocomplete="off">
+          <input
+            id="verify-code-input"
+            type="text"
+            required
+            placeholder="Ingresa el ID de Verificación (Ej: SDJ-2026-AB12CD)"
+            class="flex-1 bg-black border border-crtBorder focus:border-neonCyan rounded-lg px-4 py-3 text-sm text-white uppercase font-mono tracking-wider focus:outline-none"
+          />
+          <button type="submit" class="px-6 py-3 rounded-lg bg-neonCyan text-black font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-neonCyan/90 transition-all shrink-0">
+            Verificar Diploma &rarr;
+          </button>
+        </form>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+          <span>Certificados emitidos recientemente en este navegador:</span>
+          <div id="verify-quick-codes" class="flex flex-wrap gap-2">
+            <!-- Botones rápidos renderizados por renderer.js -->
+          </div>
+        </div>
+
+        <!-- Resultado de la Verificación -->
+        <div id="verify-result-box" class="pt-2">
+          <!-- Renderizado por renderer.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 5E: MODO DUELO MULTIJUGADOR 1V1 (PVP HACKER DUEL - IDEA #1)
+         ========================================== -->
+    <section id="view-duel" class="view-section hidden space-y-6">
+      <div class="bg-crtPanel border-2 border-neonAmber rounded-xl p-6 shadow-neon-amber flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-widest text-neonAmber flex items-center gap-2">
+            <span class="animate-ping inline-flex h-2 w-2 rounded-full bg-neonAmber"></span>
+            <span>PVP HACKER DUEL // SALA SIMULTÁNEA 1 VS 1</span>
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">
+            Duelo Táctico 1v1 en Tiempo Real
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
+            Crea o comparte un código de sala de 4 dígitos y compite en <strong>5 asaltos simultáneos con personas reales</strong>. Esta arena es 100% multijugador auténtico y se activa únicamente cuando hay al menos 2 operadores reales conectados a la misma sala (sin bots ni simulaciones).
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
+          <div class="bg-black border border-crtBorder rounded-lg px-3 py-2 text-xs">
+            <span class="text-[10px] text-slate-400 block">CÓDIGO DE SALA</span>
+            <span id="duel-room-badge" class="font-bold text-neonCyan font-mono text-sm">SALA #4829</span>
+          </div>
+          <button id="btn-duel-new-room" type="button" class="px-3.5 py-2.5 rounded-lg bg-neonCyan/15 hover:bg-neonCyan text-neonCyan hover:text-black border border-neonCyan/40 font-bold text-xs transition-all">
+            🔗 Nueva Sala 1v1
+          </button>
+        </div>
+      </div>
+
+      <!-- Selector de Rival / Oponente y Arena 1v1 -->
+      <div id="duel-arena-container">
+        <!-- Renderizado por renderer.js -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 5F: GENERADOR AUTOMÁTICO DE CV / PORTAFOLIO TÉCNICO (IDEA #3)
+         ========================================== -->
+    <section id="view-portfolio" class="view-section hidden space-y-6">
+      <div class="bg-crtPanel border border-crtBorder rounded-xl p-6 shadow-panel flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-widest text-neonGreen">
+            📄 PERFIL DE EMPLEABILIDAD &amp; CREDENCIALES TÉCNICAS
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">
+            Portafolio &amp; Generador Automático de CV Técnico
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            Tu hoja de vida interactiva generada en tiempo real según tus niveles completados, récords en Arena, Jefes derrotados y certificados verificados.
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
+          <button id="btn-portfolio-linkedin" type="button" class="px-4 py-2.5 rounded-lg bg-neonCyan text-black font-bold text-xs hover:bg-neonCyan/90 transition-all">
+            📋 Copiar Resumen para LinkedIn
+          </button>
+          <button id="btn-portfolio-print-cv" type="button" class="px-4 py-2.5 rounded-lg bg-neonGreen text-black font-bold text-xs hover:bg-neonGreen/90 transition-all shadow-neon-green">
+            🖨️ Descargar CV Técnico HD (PDF)
+          </button>
+        </div>
+      </div>
+
+      <div id="portfolio-feedback-banner" class="hidden bg-neonGreen/15 border border-neonGreen text-neonGreen text-xs font-bold px-4 py-2.5 rounded-lg">
+        ✔ Resumen profesional copiado al portapapeles listo para pegar en tu sección "Acerca de" o "Licencias y Certificaciones" de LinkedIn.
+      </div>
+
+      <div id="portfolio-container">
+        <!-- Renderizado por renderer.js -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 5G: CONFIGURACIÓN DEL OPERADOR, AVATARES, SENSIBILIDAD, TIENDA XP Y SEGURIDAD 2FA (IDEA #5 + BLINDAJE)
+         ========================================== -->
+    <section id="view-settings" class="view-section hidden space-y-6">
+      <div class="bg-crtPanel border border-crtBorder rounded-xl p-6 shadow-panel flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-widest text-neonCyan">
+            ⚙️ CENTRO DE PERSONALIZACIÓN, SENSIBILIDAD Y CIBERSEGURIDAD
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">
+            Configuración del Operador &amp; Tienda XP
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            Personaliza tu foto de perfil o avatar programado, canjea tu XP por temas retro-futuristas y switches mecánicos, y ajusta la sensibilidad visual y auditiva. La seguridad de tu cuenta se gestiona automáticamente.
+          </p>
+        </div>
+        <div class="bg-black border border-neonGreen/50 rounded-lg px-4 py-2.5 text-right shrink-0">
+          <span class="text-[10px] text-slate-400 uppercase block">SALDO DISPONIBLE PARA CANJE</span>
+          <span id="settings-xp-balance" class="text-xl font-extrabold text-neonGreen">0 XP</span>
+        </div>
+      </div>
+
+      <div id="settings-container" class="space-y-6">
+        <!-- Renderizado dinámicamente por renderer.js -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 6: PLANES DE PAGO & PASARELA COLOMBIA (WOMPI / MERCADO PAGO / PSE / NEQUI)
+         ========================================== -->
+    <section id="view-pricing" class="view-section hidden space-y-8 py-4">
+      <div class="text-center max-w-3xl mx-auto space-y-3">
+        <span class="text-xs font-bold uppercase tracking-widest text-neonAmber">
+          🇨🇴 PAGOS NACIONALES E INTERNACIONALES // WOMPI BANCOLOMBIA &amp; MERCADO PAGO
+        </span>
+        <h2 class="text-3xl font-bold text-white">Desbloquea todo el arsenal de ShellDojo</h2>
+        <p class="text-sm text-slate-400">
+          Paga fácil en <strong>Pesos Colombianos (COP)</strong> con <strong>Nequi, PSE, Daviplata o Tarjeta</strong>, o en USD si estás fuera de Colombia.
+        </p>
+
+        <!-- Controles de Moneda (COP / USD) y Ciclo (Mensual / Anual -20%) -->
+        <div class="flex flex-wrap items-center justify-center gap-4 pt-2">
+          <!-- Selector COP / USD -->
+          <div class="inline-flex items-center bg-black border border-crtBorder rounded-lg p-1 text-xs">
+            <button id="btn-currency-cop" type="button" class="px-3 py-1.5 rounded font-bold bg-neonGreen text-black transition-all">
+              🇨🇴 Pesos (COP)
+            </button>
+            <button id="btn-currency-usd" type="button" class="px-3 py-1.5 rounded font-bold text-slate-400 hover:text-white transition-all">
+              🌎 Dólares (USD)
+            </button>
+          </div>
+
+          <!-- Selector Mensual / Anual -->
+          <div class="inline-flex items-center bg-black border border-crtBorder rounded-lg p-1 text-xs">
+            <button id="btn-cycle-monthly" type="button" class="px-3 py-1.5 rounded font-bold bg-neonCyan text-black transition-all">
+              Facturación Mensual
+            </button>
+            <button id="btn-cycle-yearly" type="button" class="px-3 py-1.5 rounded font-bold text-slate-400 hover:text-white transition-all flex items-center gap-1.5">
+              <span>Plan Anual</span>
+              <span class="px-1.5 py-0.5 rounded bg-neonAmber/20 text-neonAmber text-[10px]">AHORRA 20%</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjetas de los 3 Planes -->
+      <div id="pricing-cards-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+        <!-- Renderizado por renderer.js -->
+      </div>
+
+      <!-- Sellos de Confianza Colombia -->
+      <div class="bg-crtPanel border border-crtBorder rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">🛡️</span>
+          <div>
+            <strong class="text-white block">Pasarela Certificada PCI-DSS Nivel 1 (Wompi / Mercado Pago Colombia)</strong>
+            <span>Activación instantánea con Nequi, PSE (Todos los bancos en Colombia), Daviplata y Tarjetas Visa/Mastercard.</span>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2 shrink-0 font-bold text-[11px]">
+          <span class="px-2.5 py-1 rounded bg-pink-500/15 text-pink-400 border border-pink-500/40">NEQUI</span>
+          <span class="px-2.5 py-1 rounded bg-neonCyan/15 text-neonCyan border border-neonCyan/40">PSE ACH</span>
+          <span class="px-2.5 py-1 rounded bg-neonRed/15 text-neonRed border border-neonRed/40">DAVIPLATA</span>
+          <span class="px-2.5 py-1 rounded bg-neonAmber/15 text-neonAmber border border-neonAmber/40">BANCOLOMBIA</span>
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           MODAL REALISTA DE PASARELA COLOMBIA (WOMPI / MERCADO PAGO / PSE)
+           ==================================================================== -->
+      <div id="checkout-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-crtPanel border-2 border-neonGreen rounded-xl max-w-2xl w-full p-6 space-y-5 shadow-neon-green my-8">
+          
+          <!-- Cabecera de la Pasarela -->
+          <div class="flex items-center justify-between border-b border-crtBorder pb-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-neonGreen/15 text-neonGreen border border-neonGreen/40">
+                  🔒 CONEXIÓN CIFRADA TLS 1.3
+                </span>
+                <span class="text-[10px] text-slate-400">WOMPI BANCOLOMBIA • MERCADO PAGO CO</span>
+              </div>
+              <h3 id="checkout-plan-title" class="text-lg sm:text-xl font-bold text-white mt-1">
+                Suscripción Pro Operator
+              </h3>
+            </div>
+            <button id="btn-close-checkout" type="button" class="text-slate-400 hover:text-white text-base font-bold px-2 py-1 rounded border border-transparent hover:border-crtBorder">
+              ✕
+            </button>
+          </div>
+
+          <!-- PASO 1: FORMULARIO DE PAGO MULTI-MÉTODO -->
+          <div id="checkout-step-form" class="space-y-5">
+            
+            <!-- Pestañas de Método de Pago Colombiano -->
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                1. Selecciona tu medio de pago en Colombia:
+              </label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-bold">
+                <button type="button" data-pay-method="nequi" class="pay-method-tab active-pay-method p-2.5 rounded-lg border border-neonGreen bg-neonGreen/15 text-neonGreen flex flex-col items-center gap-1 transition-all">
+                  <span>📱 Nequi</span>
+                  <span class="text-[10px] font-normal opacity-80">Notificación Push</span>
+                </button>
+                <button type="button" data-pay-method="pse" class="pay-method-tab p-2.5 rounded-lg border border-crtBorder bg-black text-slate-300 hover:text-white flex flex-col items-center gap-1 transition-all">
+                  <span>🏦 PSE</span>
+                  <span class="text-[10px] font-normal opacity-80">Débito Bancario</span>
+                </button>
+                <button type="button" data-pay-method="card" class="pay-method-tab p-2.5 rounded-lg border border-crtBorder bg-black text-slate-300 hover:text-white flex flex-col items-center gap-1 transition-all">
+                  <span>💳 Tarjeta</span>
+                  <span class="text-[10px] font-normal opacity-80">Crédito / Débito</span>
+                </button>
+                <button type="button" data-pay-method="daviplata" class="pay-method-tab p-2.5 rounded-lg border border-crtBorder bg-black text-slate-300 hover:text-white flex flex-col items-center gap-1 transition-all">
+                  <span>🔴 DaviPlata</span>
+                  <span class="text-[10px] font-normal opacity-80">Billetera Móvil</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Cupón de Descuento + Resumen de Factura con IVA 19% -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 bg-black/60 border border-crtBorder rounded-lg p-4">
+              <div class="md:col-span-6 space-y-2">
+                <label class="block text-[11px] font-bold uppercase text-slate-400">
+                  ¿Tienes un cupón o beca?
+                </label>
+                <div class="flex gap-2">
+                  <input
+                    id="checkout-coupon-input"
+                    type="text"
+                    placeholder="Ej: Código de descuento"
+                    class="w-full bg-crtPanel border border-crtBorder focus:border-neonCyan rounded px-3 py-1.5 text-xs text-white uppercase focus:outline-none"
+                  />
+                  <button id="btn-apply-coupon" type="button" class="px-3 py-1.5 rounded bg-neonCyan/20 hover:bg-neonCyan text-neonCyan hover:text-black border border-neonCyan/40 font-bold text-xs transition-all shrink-0">
+                    Aplicar
+                  </button>
+                </div>
+                <p id="checkout-coupon-feedback" class="text-[11px] text-slate-400">
+                  Ingresa tu código si tienes uno.
+                </p>
+              </div>
+
+              <!-- Desglose Tributario DIAN (Subtotal, Descuento, IVA 19%, Total) -->
+              <div class="md:col-span-6 space-y-1 text-xs border-t md:border-t-0 md:border-l border-crtBorder pt-3 md:pt-0 md:pl-4">
+                <div class="flex justify-between text-slate-400">
+                  <span>Base Gravable (Sin IVA):</span>
+                  <span id="summary-base">$25.126 COP</span>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                  <span>IVA Colombia (19% incl.):</span>
+                  <span id="summary-iva">$4.774 COP</span>
+                </div>
+                <div id="summary-discount-row" class="hidden justify-between text-neonGreen font-semibold">
+                  <span>Descuento Aplicado:</span>
+                  <span id="summary-discount">-$0 COP</span>
+                </div>
+                <div class="flex justify-between text-white font-bold text-sm pt-1.5 border-t border-crtBorder">
+                  <span>Total a Pagar:</span>
+                  <span id="checkout-plan-price" class="text-neonGreen text-base">$29.900 COP</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- FORMULARIO DINÁMICO SEGÚN MÉTODO ELEGIDO -->
+            <form id="form-checkout" class="space-y-4" autocomplete="off">
+              
+              <!-- Datos Comunes de Facturación en Colombia (Cédula / NIT) -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-[11px] text-slate-400 uppercase mb-1">Tipo Documento</label>
+                  <select id="pay-doc-type" class="w-full bg-black border border-crtBorder rounded px-3 py-2 text-xs text-white focus:outline-none">
+                    <option value="CC">CC - Cédula Ciudadanía</option>
+                    <option value="CE">CE - Cédula Extranjería</option>
+                    <option value="NIT">NIT - Empresa / RUT</option>
+                    <option value="TI">TI - Tarjeta Identidad</option>
+                  </select>
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block text-[11px] text-slate-400 uppercase mb-1">Número de Documento</label>
+                  <input
+                    id="pay-doc-number"
+                    type="text"
+                    required
+                    placeholder="Ej: 1020845912"
+                    class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-xs text-white focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <!-- Sub-formulario 1: NEQUI -->
+              <div id="method-fields-nequi" class="method-panel bg-pink-500/5 border border-pink-500/30 rounded-lg p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-pink-400">📱 Pago Rápido con Nequi Push</span>
+                  <span class="text-[10px] text-slate-400">Sin clave dinámica manual</span>
+                </div>
+                <div>
+                  <label class="block text-xs text-slate-300 mb-1">Número de Celular Nequi (10 dígitos en Colombia)</label>
+                  <input
+                    id="nequi-phone"
+                    type="tel"
+                    maxlength="10"
+                    placeholder="300 456 7890"
+                    class="w-full bg-black border border-crtBorder focus:border-pink-400 rounded px-3 py-2 text-sm text-white font-bold tracking-wider focus:outline-none"
+                  />
+                  <p class="text-[11px] text-slate-400 mt-1">
+                    Enviaremos una notificación de cobro a tu app Nequi para que la aceptes en un toque.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Sub-formulario 2: PSE (Bancos de Colombia) -->
+              <div id="method-fields-pse" class="method-panel hidden bg-neonCyan/5 border border-neonCyan/30 rounded-lg p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-neonCyan">🏦 Débito Bancario PSE (ACH Colombia)</span>
+                  <span class="text-[10px] text-slate-400">Cuenta de Ahorros o Corriente</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs text-slate-300 mb-1">Selecciona tu Banco</label>
+                    <select id="pse-bank-select" class="w-full bg-black border border-crtBorder focus:border-neonCyan rounded px-3 py-2 text-xs text-white focus:outline-none">
+                      <!-- Llenado dinámicamente con COLOMBIAN_BANKS_PSE -->
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs text-slate-300 mb-1">Tipo de Persona</label>
+                    <select id="pse-person-type" class="w-full bg-black border border-crtBorder focus:border-neonCyan rounded px-3 py-2 text-xs text-white focus:outline-none">
+                      <option value="natural">Persona Natural</option>
+                      <option value="juridica">Persona Jurídica (Empresa)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sub-formulario 3: TARJETA CRÉDITO / DÉBITO -->
+              <div id="method-fields-card" class="method-panel hidden bg-neonGreen/5 border border-neonGreen/30 rounded-lg p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-neonGreen">💳 Tarjeta de Crédito o Débito con CVV</span>
+                  <span id="card-brand-badge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-black border border-crtBorder text-neonAmber">VISA</span>
+                </div>
+                <div>
+                  <label class="block text-xs text-slate-300 mb-1">Número de Tarjeta</label>
+                  <input
+                    id="card-number-input"
+                    type="text"
+                    maxlength="19"
+                    placeholder="0000 0000 0000 0000"
+                    class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-sm text-white font-bold tracking-widest focus:outline-none"
+                  />
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">Vencimiento</label>
+                    <input type="text" placeholder="MM/AA" class="w-full bg-black border border-crtBorder rounded px-3 py-2 text-xs text-white focus:outline-none" />
+                  </div>
+                  <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">CVC / CVV</label>
+                    <input type="text" maxlength="4" placeholder="CVC" class="w-full bg-black border border-crtBorder rounded px-3 py-2 text-xs text-white focus:outline-none" />
+                  </div>
+                  <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">Cuotas</label>
+                    <select class="w-full bg-black border border-crtBorder rounded px-2 py-2 text-xs text-white focus:outline-none">
+                      <option value="1">1 cuota (Sin interés)</option>
+                      <option value="3">3 cuotas</option>
+                      <option value="6">6 cuotas</option>
+                      <option value="12">12 cuotas</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sub-formulario 4: DAVIPLATA -->
+              <div id="method-fields-daviplata" class="method-panel hidden bg-neonRed/5 border border-neonRed/30 rounded-lg p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-neonRed">🔴 Billetera DaviPlata</span>
+                  <span class="text-[10px] text-slate-400">Confirmación por SMS / App</span>
+                </div>
+                <div>
+                  <label class="block text-xs text-slate-300 mb-1">Celular asociado a DaviPlata (10 dígitos)</label>
+                  <input
+                    id="daviplata-phone"
+                    type="tel"
+                    maxlength="10"
+                    placeholder="310 987 6543"
+                    class="w-full bg-black border border-crtBorder focus:border-neonRed rounded px-3 py-2 text-sm text-white font-bold tracking-wider focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div id="checkout-error-msg" class="hidden text-xs text-neonRed font-bold"></div>
+
+              <button id="btn-submit-payment" type="submit" class="w-full py-3.5 rounded-lg bg-neonGreen text-black font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-neonGreen/90 transition-all shadow-neon-green">
+                ⚡ Pagar Ahora y Desbloquear Licencia PRO
+              </button>
+            </form>
+          </div>
+
+          <!-- PASO 2: PANTALLA DE PROCESAMIENTO BANCARIO (SPINNER EN VIVO) -->
+          <div id="checkout-step-processing" class="hidden py-10 text-center space-y-4">
+            <div class="w-12 h-12 rounded-full border-4 border-neonGreen border-t-transparent animate-spin mx-auto"></div>
+            <h4 id="processing-title" class="text-base font-bold text-white">
+              Conectando con la pasarela bancaria en Colombia...
+            </h4>
+            <p id="processing-subtitle" class="text-xs text-neonCyan font-mono">
+              Verificando transacción con ACH / Wompi Bancolombia...
+            </p>
+          </div>
+
+          <!-- PASO 3: COMPROBANTE OFICIAL DE TRANSACCIÓN APROBADA -->
+          <div id="checkout-step-receipt" class="hidden space-y-5">
+            <div class="bg-neonGreen/10 border border-neonGreen rounded-lg p-4 text-center space-y-1">
+              <span class="text-2xl">✅</span>
+              <h4 class="text-lg font-bold text-neonGreen">¡TRANSACCIÓN APROBADA!</h4>
+              <p class="text-xs text-slate-300">Tu licencia ha sido activada y todas las rutas PRO están desbloqueadas.</p>
+            </div>
+
+            <div class="bg-black border border-crtBorder rounded-lg p-4 space-y-2 text-xs font-mono">
+              <div class="flex justify-between">
+                <span class="text-slate-400">Referencia Wompi:</span>
+                <span id="receipt-ref" class="text-white font-bold">WOMPI-CO-000000</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Código Único CUS / ACH:</span>
+                <span id="receipt-cus" class="text-neonCyan">000000000</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Medio de Pago:</span>
+                <span id="receipt-method" class="text-neonAmber font-bold">Nequi</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Documento Titular:</span>
+                <span id="receipt-doc" class="text-slate-200">CC 1020845912</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Fecha y Hora:</span>
+                <span id="receipt-date" class="text-slate-200">2026</span>
+              </div>
+              <div class="flex justify-between border-t border-crtBorder pt-2">
+                <span class="text-slate-400">Licencia vinculada a tu cuenta:</span>
+                <span id="receipt-license-token" class="text-neonGreen font-bold">SDJ-LIC-PRO-00000000</span>
+              </div>
+              <div class="flex justify-between border-t border-crtBorder pt-2 text-sm font-bold">
+                <span class="text-white">Valor Pagado:</span>
+                <span id="receipt-total" class="text-neonGreen">$29.900 COP</span>
+              </div>
+            </div>
+
+            <p class="text-[11px] text-slate-400 text-center">
+              🛡️ Tu cuenta quedó protegida automáticamente con verificación y cifrado de datos.
+            </p>
+            <button id="btn-finish-receipt" type="button" class="w-full py-3 rounded-lg bg-neonGreen text-black font-bold text-xs uppercase tracking-wider hover:bg-neonGreen/90 transition-all">
+              Ir a mi Dashboard PRO &rarr;
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         MODAL GLOBAL DE CERTIFICADO OFICIAL SHELLDOJO (ENVÍO A GMAIL & PDF)
+         ==================================================================== -->
+    <div id="certificate-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div class="bg-crtPanel border-2 border-neonGreen rounded-2xl max-w-3xl w-full p-6 sm:p-8 space-y-6 shadow-neon-green my-8">
+        <!-- Barra superior del modal -->
+        <div class="flex items-center justify-between border-b border-crtBorder pb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase px-2.5 py-0.5 rounded bg-neonGreen/15 text-neonGreen border border-neonGreen/40">
+              🎓 EMISIÓN DE CERTIFICADO OFICIAL
+            </span>
+            <span id="cert-modal-id" class="text-xs text-slate-400 font-mono">SDJ-2026-XXXXXX</span>
+          </div>
+          <button id="btn-close-certificate" type="button" class="text-slate-400 hover:text-white text-base font-bold px-2 py-1 rounded">
+            ✕
+          </button>
+        </div>
+
+        <!-- Vista Previa del Diploma (Exclusivo con Logo y Nombre de SHELLDOJO, sin terceros) -->
+        <div class="bg-gradient-to-b from-black via-crtBg to-black border-2 border-neonGreen/80 rounded-xl p-6 sm:p-8 text-center space-y-4 relative shadow-panel">
+          <div class="border border-neonCyan/30 rounded-lg p-5 sm:p-7 space-y-4">
+            <!-- Logo y Nombre de la Empresa -->
+            <div class="inline-flex items-center justify-center gap-3">
+              <div class="w-11 h-11 rounded-lg bg-black border-2 border-neonGreen flex items-center justify-center shadow-neon-green">
+                <span class="text-neonGreen font-extrabold text-xl tracking-tighter">&gt;_</span>
+              </div>
+              <div class="text-left">
+                <div class="font-display text-2xl tracking-widest text-white font-bold">
+                  SHELL<span class="text-neonGreen">DOJO</span>
+                </div>
+                <div class="text-[10px] uppercase tracking-widest text-neonCyan">
+                  TERMINAL ACADEMY &amp; PANIC ARENA
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-1">
+              <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-neonCyan/10 text-neonCyan border border-neonCyan/40">
+                CERTIFICADO DE EXCELENCIA TÉCNICA
+              </span>
+            </div>
+
+            <p class="text-xs uppercase tracking-widest text-slate-400">
+              SHELLDOJO OTORGA EL PRESENTE RECONOCIMIENTO OFICIAL A:
+            </p>
+
+            <h3 id="cert-preview-name" class="text-2xl sm:text-3xl font-extrabold text-neonGreen tracking-wide uppercase glow-green">
+              OPERADOR SHELLDOJO
+            </h3>
+
+            <p id="cert-preview-identity" class="text-xs font-semibold text-neonCyan tracking-wide">
+              ID: CC 1020845912 • SENA / Universidad Nacional • Ingeniería de Sistemas &amp; DevOps (Colombia)
+            </p>
+
+            <p class="text-xs uppercase tracking-widest text-slate-400">
+              POR COMPLETAR SATISFACTORIAMENTE EL ENTRENAMIENTO PRÁCTICO EN:
+            </p>
+
+            <h4 id="cert-preview-course" class="text-base sm:text-xl font-bold text-white max-w-xl mx-auto">
+              "Dominio Táctico de Terminal &amp; Operaciones CLI"
+            </h4>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-crtBorder text-xs">
+              <div class="bg-crtPanel/80 border border-crtBorder rounded p-2.5">
+                <span class="text-[10px] text-slate-400 block">ID DE VERIFICACIÓN PÚBLICA</span>
+                <span id="cert-preview-code" class="font-bold text-white">SDJ-2026-001</span>
+              </div>
+              <div class="bg-crtPanel/80 border border-crtBorder rounded p-2.5">
+                <span class="text-[10px] text-slate-400 block">RANGO ALCANZADO</span>
+                <span id="cert-preview-rank" class="font-bold text-neonCyan">DevOps Ninja</span>
+              </div>
+              <div class="bg-crtPanel/80 border border-crtBorder rounded p-2.5">
+                <span class="text-[10px] text-slate-400 block">FECHA DE EMISIÓN</span>
+                <span id="cert-preview-date" class="font-bold text-neonAmber">Noviembre 2026</span>
+              </div>
+            </div>
+
+            <div class="pt-2 text-[11px] font-bold tracking-widest text-neonAmber uppercase">
+              ★ EXPEDIDO OFICIALMENTE POR SHELLDOJO ★
+            </div>
+          </div>
+        </div>
+
+        <!-- Formulario para Personalizar Datos del Titular y Enviar directo a Gmail -->
+        <div class="bg-black/60 border border-crtBorder rounded-xl p-4 space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] text-slate-400 uppercase mb-1">Nombre Completo en el Certificado</label>
+              <input
+                id="cert-input-name"
+                type="text"
+                placeholder="Tu Nombre Completo"
+                class="w-full bg-crtPanel border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-xs text-white focus:outline-none"
+              />
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 uppercase mb-1">Documento de Identidad (CC / TI / CE)</label>
+              <input
+                id="cert-input-doc"
+                type="text"
+                placeholder="Ej: CC 1020845912"
+                class="w-full bg-crtPanel border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-xs text-white focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] text-slate-400 uppercase mb-1">Universidad / SENA / Empresa</label>
+              <input
+                id="cert-input-institution"
+                type="text"
+                placeholder="Ej: SENA / Universidad Nacional / Empresa"
+                class="w-full bg-crtPanel border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-xs text-white focus:outline-none"
+              />
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 uppercase mb-1">Tu Correo de Gmail Destino</label>
+              <input
+                id="cert-input-email"
+                type="email"
+                placeholder="tucorreo@gmail.com"
+                class="w-full bg-crtPanel border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-xs text-white focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+            <button id="btn-cert-send-gmail" type="button" class="flex-1 py-3 px-4 rounded-lg bg-neonRed hover:bg-neonRed/90 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-neon-red flex items-center justify-center gap-2">
+              <span>📧</span>
+              <span>Enviar a mi Gmail</span>
+            </button>
+            <button id="btn-cert-download-pdf" type="button" class="flex-1 py-3 px-4 rounded-lg bg-neonGreen hover:bg-neonGreen/90 text-black font-bold text-xs uppercase tracking-wider transition-all shadow-neon-green flex items-center justify-center gap-2">
+              <span>🖨️</span>
+              <span>Descargar PDF HD</span>
+            </button>
+            <button id="btn-cert-share-linkedin" type="button" class="flex-1 py-3 px-4 rounded-lg bg-[#0077b5] hover:bg-[#0077b5]/90 text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2">
+              <span>💼</span>
+              <span>Añadir a LinkedIn</span>
+            </button>
+          </div>
+          <p id="cert-status-feedback" class="text-[11px] text-neonGreen text-center hidden">
+            ✔ Se ha abierto Gmail con tu certificado oficial listo para enviar y guardar en tu bandeja.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-crtBorder bg-crtPanel/60 py-4 px-4 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span>SHELLDOJO // TERMINAL ACADEMY &amp; PANIC ARENA</span>
+        <span>•</span>
+        <button id="btn-footer-feedback" type="button" class="text-neonGreen hover:underline font-bold transition-colors flex items-center gap-1">
+          <span>💬</span> Dejar una Opinión / Sugerencia
+        </button>
+      </div>
+      <span>SaaS Edition • ES6 Modular • Web Audio API</span>
+    </div>
+  </footer>
+
+  <!-- Botón Flotante de Soporte / Feedback Rápido (Burbuja Móvil) -->
+  <div id="quick-support-bubble" class="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-3 select-none">
+    <!-- Ventana emergente compacta de ayuda rápida (inicialmente oculta) -->
+    <div id="quick-support-card" class="hidden w-80 bg-crtPanel border-2 border-neonGreen/80 rounded-2xl p-4 shadow-neon-green space-y-3 backdrop-blur-md">
+      <div class="flex items-center justify-between border-b border-crtBorder pb-2">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-neonGreen animate-ping"></span>
+          <span class="text-xs font-bold text-white uppercase tracking-wider">Centro de Asistencia</span>
+        </div>
+        <button id="btn-close-support-card" type="button" class="text-slate-400 hover:text-white text-base leading-none">&times;</button>
+      </div>
+
+      <p class="text-[11px] text-slate-300 leading-relaxed">
+        ¿Tienes una duda técnica, sugerencia de lección o encontraste un detalle en la plataforma?
+      </p>
+
+      <div class="space-y-1.5 text-xs">
+        <button
+          id="btn-quick-open-feedback"
+          type="button"
+          class="w-full py-2.5 px-3 rounded-lg bg-neonGreen text-black font-bold text-xs uppercase tracking-wider hover:bg-neonGreen/90 transition-all flex items-center justify-center gap-2 shadow-neon-green"
+        >
+          <span>💬</span>
+          <span>Abrir Buzón de Opinión</span>
+        </button>
+
+        <a
+          id="btn-quick-support-mail"
+          href="mailto:soporteshelldojo@gmail.com?subject=Soporte%20ShellDojo%20Academy"
+          class="w-full py-2 px-3 rounded-lg bg-black hover:bg-neonCyan/20 text-neonCyan border border-neonCyan/40 font-bold text-xs transition-all flex items-center justify-center gap-2"
+        >
+          <span>✉️</span>
+          <span>Escribir a Soporte Técnico</span>
+        </a>
+      </div>
+
+      <div class="pt-2 border-t border-crtBorder/60 flex items-center justify-between text-[10px] text-slate-400">
+        <span>Consejo Pro:</span>
+        <span class="flex items-center gap-1">
+          <kbd class="px-1.5 py-0.5 rounded bg-black border border-crtBorder font-mono text-neonGreen">Tab</kbd>
+          <span class="text-slate-400">Autocompletar en Dojo</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Botón Gatillo Flotante Principal -->
+    <button
+      id="btn-toggle-support-bubble"
+      type="button"
+      title="¿Dudas o Sugerencias? Clic aquí"
+      class="group flex items-center gap-2.5 px-4 py-3 rounded-full bg-black/90 hover:bg-neonGreen text-neonGreen hover:text-black border-2 border-neonGreen font-bold text-xs transition-all shadow-neon-green cursor-pointer transform hover:scale-105 active:scale-95"
+    >
+      <span class="text-base group-hover:rotate-12 transition-transform">💬</span>
+      <span class="hidden sm:inline tracking-wider uppercase text-[11px]">¿Dudas o Sugerencias?</span>
+    </button>
+  </div>
+
+  <!-- Punto de entrada ES6 Module -->
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+/* ==========================================================================
+   SHELLDOJO - EFECTOS DE MONITOR CRT CYBERPUNK
+   ========================================================================== */
+
+/* Superposición global de líneas de escaneo (scanlines) + viñeta suave */
+.crt-overlay {
+  background:
+    linear-gradient(
+      rgba(18, 16, 16, 0) 50%,
+      rgba(0, 0, 0, 0.28) 50%
+    ),
+    radial-gradient(
+      circle at center,
+      transparent 65%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
+  background-size: 100% 4px, 100% 100%;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* Brillos Neón en contenedores y botones */
+.shadow-panel {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.shadow-neon-green {
+  box-shadow: 0 0 14px rgba(0, 255, 102, 0.28), inset 0 0 8px rgba(0, 255, 102, 0.12);
+}
+
+.shadow-neon-amber {
+  box-shadow: 0 0 14px rgba(255, 184, 0, 0.28), inset 0 0 8px rgba(255, 184, 0, 0.12);
+}
+
+.shadow-neon-cyan {
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.28), inset 0 0 8px rgba(0, 229, 255, 0.12);
+}
+
+.shadow-neon-red {
+  box-shadow: 0 0 16px rgba(255, 51, 51, 0.32), inset 0 0 8px rgba(255, 51, 51, 0.14);
+}
+
+/* Resplandor de texto CRT */
+.glow-green {
+  text-shadow: 0 0 8px rgba(0, 255, 102, 0.6);
+}
+
+.glow-red {
+  text-shadow: 0 0 8px rgba(255, 51, 51, 0.6);
+}
+
+.glow-cyan {
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
+}
+

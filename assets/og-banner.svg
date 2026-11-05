@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#070A0E"/>
+  <rect x="40" y="40" width="1120" height="550" rx="16" fill="#0D131A" stroke="#00FF66" stroke-width="3"/>
+  <circle cx="85" cy="85" r="10" fill="#FF3333"/>
+  <circle cx="120" cy="85" r="10" fill="#FFB800"/>
+  <circle cx="155" cy="85" r="10" fill="#00FF66"/>
+  <text x="100" y="250" fill="#00FF66" font-family="monospace" font-size="78" font-weight="bold">&gt;_ SHELLDOJO</text>
+  <text x="100" y="330" fill="#FFFFFF" font-family="monospace" font-size="38">Terminal Academy &amp; Panic Arena</text>
+  <text x="100" y="420" fill="#00E5FF" font-family="monospace" font-size="26">[Git &amp; GitHub]  [Linux &amp; Bash]  [Docker]  [Windows CMD &amp; NetOps]</text>
+  <text x="100" y="510" fill="#FFB800" font-family="monospace" font-size="24">Entrena paso a paso sin reloj o sobrevive a emergencias de 15 segundos.</text>
+</svg>
+

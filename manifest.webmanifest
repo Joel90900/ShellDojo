@@ -1,0 +1,19 @@
+{
+  "name": "ShellDojo: Terminal Academy & Panic Arena",
+  "short_name": "ShellDojo",
+  "description": "Plataforma interactiva para aprender comandos Git, Linux, Docker y Redes paso a paso y competir a contrarreloj.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070a0e",
+  "theme_color": "#00ff66",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+

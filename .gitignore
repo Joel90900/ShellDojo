@@ -1,0 +1,21 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Dependencies & Build
+node_modules/
+dist/
+.vercel/
+.env
+.env.local
+
+
+# Datos privados del servidor (credenciales, usuarios, pagos, auditoría)
+data/
