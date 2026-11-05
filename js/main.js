@@ -7,8 +7,7 @@
  * - Dashboard de Rutas, Modo Dojo, Panic Arena, Misiones Diarias y Diccionario
  */
 
-import { CURRICULUM_DATA, SUBSCRIPTION_PLANS } from './data/curriculum.js';
-import {
+import { CURRICULUM_DATA, SUBSCRIPTION_PLANS } from './curriculum.js';import {
   getState,
   isAuthenticated,
   hasProAccess,
