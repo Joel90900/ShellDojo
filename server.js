@@ -1500,7 +1500,10 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`ShellDojo server running at http://localhost:${PORT}`);
-  console.log(`Panel de administración: http://localhost:${PORT}/admin`);
+
+const HOST = '0.0.0.0';
+
+server.listen(PORT, HOST, () => {
+    console.log(`ShellDojo server running at http://${HOST}:${PORT}`);
+    console.log(`Panel de administración: http://${HOST}:${PORT}/admin`);
 });

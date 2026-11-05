@@ -1,28 +1,24 @@
 /**
- * SHELLDOJO - MOTOR DE PASARELA DE PAGOS COLOMBIA & LATAM (WOMPI / MERCADO PAGO / PSE / NEQUI)
- *
- * ¿CÓMO CONECTAR TUS PAGOS REALES EN PRODUCCIÓN?
- * 1. Crea tu cuenta en Wompi Bancolombia (comercios.wompi.co) o Mercado Pago Colombia (mercadopago.com.co).
- * 2. Crea tus Links de Pago para el Plan Pro Operator y Cyber Squad.
- * 3. En la URL de redirección exitosa de Wompi/MercadoPago coloca:
- *    https://tu-dominio.com/?payment=approved&plan=pro
- * 4. Cambia `mode: 'sandbox'` a `mode: 'live_redirect'` y pega tus URLs en `liveLinks`.
+ * SHELLDOJO - MOTOR DE PASARELA OFICIAL WOMPI BANCOLOMBIA (NEQUI / PSE / TARJETAS)
+ * Enlace Oficial de Pago: https://checkout.wompi.co/l/VPOS_amBAhi
  */
 
+export const WOMPI_OFFICIAL_CHECKOUT_URL = 'https://checkout.wompi.co/l/VPOS_amBAhi';
+
 export const PAYMENT_GATEWAY_CONFIG = {
-  // 'sandbox' = Simulador bancario colombiano hiperrealista (Nequi, PSE, Daviplata, Tarjetas)
-  // 'live_redirect' = Redirige directamente a tu Link de Pago real de Wompi o Mercado Pago
-  mode: 'sandbox',
-  providerName: 'Wompi Bancolombia & Mercado Pago Colombia',
+  mode: 'live_wompi',
+  providerName: 'Wompi Bancolombia Oficial',
+  officialCheckoutUrl: WOMPI_OFFICIAL_CHECKOUT_URL,
   defaultCurrency: 'COP', // 'COP' | 'USD'
   exchangeRateCOP: 4000,
   ivaRate: 0.19, // 19% IVA Colombia
 
   liveLinks: {
-    pro_monthly: '', // Ej: 'https://checkout.wompi.co/l/tu-link-pro-mensual'
-    pro_yearly: '',  // Ej: 'https://checkout.wompi.co/l/tu-link-pro-anual'
-    team_monthly: '',
-    team_yearly: ''
+    pro_monthly: WOMPI_OFFICIAL_CHECKOUT_URL,
+    pro_yearly: WOMPI_OFFICIAL_CHECKOUT_URL,
+    team_monthly: WOMPI_OFFICIAL_CHECKOUT_URL,
+    team_yearly: WOMPI_OFFICIAL_CHECKOUT_URL,
+    default: WOMPI_OFFICIAL_CHECKOUT_URL
   }
 };
 

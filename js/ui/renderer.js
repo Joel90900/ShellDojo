@@ -648,7 +648,7 @@ export function renderPricingPlans(callbacks = {}) {
             ? 'Plan Activo Actualmente'
             : plan.priceMonthlyCOP === 0
             ? 'Cambiar a Plan Básico'
-            : `Pagar con Nequi / PSE / Tarjeta &rarr;`
+            : `💳 Pagar con Wompi Oficial &rarr;`
         }
       </button>
     `;

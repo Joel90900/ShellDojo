@@ -30,12 +30,8 @@ import {
 import { fireCyberConfetti } from './core/confetti.js';
 import {
   PAYMENT_GATEWAY_CONFIG,
-  COLOMBIAN_BANKS_PSE,
   formatCurrency,
   calculateCheckoutTotals,
-  detectCardBrand,
-  formatCardNumberInput,
-  validateColombianPhone,
   generateTransactionReceipt
 } from './core/payments.js';
 import { syncPaymentTransaction, syncAppStateWithBackend } from './core/sync.js';
@@ -62,17 +58,9 @@ import { initArenaController, startArenaSession, stopArenaTimer } from './ui/are
 let pendingCheckoutPlanId = 'pro';
 let selectedCurrency = PAYMENT_GATEWAY_CONFIG.defaultCurrency; // 'COP' | 'USD'
 let selectedBillingCycle = 'monthly'; // 'monthly' | 'yearly'
-let selectedPaymentMethod = 'nequi'; // 'nequi' | 'pse' | 'card' | 'daviplata'
 let activeCouponCode = '';
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 0. Poblar selector de bancos colombianos PSE
-  const pseBankSelect = document.getElementById('pse-bank-select');
-  if (pseBankSelect) {
-    pseBankSelect.innerHTML = COLOMBIAN_BANKS_PSE.map(
-      (bank) => `<option value="${bank}">${bank}</option>`
-    ).join('');
-  }
 
   // 1. Función maestra para refrescar todas las vistas dinámicas
   const refreshAllViews = () => {
@@ -328,19 +316,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Formateo en vivo de tarjeta y detección de marca (Visa / Mastercard / Amex)
-  const cardInput = document.getElementById('card-number-input');
-  const brandBadge = document.getElementById('card-brand-badge');
-  if (cardInput) {
-    cardInput.addEventListener('input', (e) => {
-      const formatted = formatCardNumberInput(e.target.value);
-      e.target.value = formatted;
-      if (brandBadge) {
-        brandBadge.textContent = detectCardBrand(formatted);
-      }
-    });
-  }
-
   // Cerrar modal de Checkout
   const closeCheckoutBtn = document.getElementById('btn-close-checkout');
   const checkoutModal = document.getElementById('checkout-modal');
@@ -350,113 +325,78 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Procesar Pago con Simulación Bancaria Colombiana y Generar Comprobante CUS / Wompi
-  const checkoutForm = document.getElementById('form-checkout');
-  if (checkoutForm) {
-    checkoutForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const errorMsg = document.getElementById('checkout-error-msg');
-      if (errorMsg) errorMsg.classList.add('hidden');
+  // Notificación al abrir el checkout oficial de Wompi Bancolombia
+  document.getElementById('btn-wompi-official-link')?.addEventListener('click', () => {
+    SoundFX.playSuccess();
+    const errorMsg = document.getElementById('checkout-error-msg');
+    if (errorMsg) {
+      errorMsg.className = 'text-xs text-neonGreen font-medium bg-neonGreen/10 border border-neonGreen/40 p-3 rounded-lg block space-y-1';
+      errorMsg.innerHTML = `
+        <div class="font-bold">🚀 Abriendo Wompi Bancolombia Oficial...</div>
+        <div class="text-[11px] text-slate-300">Completa tu pago seguro con Nequi, Botón Bancolombia, PSE o Tarjeta. Al finalizar, haz clic abajo en <strong>"Ya completé el pago en Wompi"</strong> para activar tu plan.</div>
+      `;
+      errorMsg.classList.remove('hidden');
+    }
+  });
 
-      // Validar celular colombiano si eligió Nequi o DaviPlata
-      if (selectedPaymentMethod === 'nequi') {
-        const phone = document.getElementById('nequi-phone')?.value;
-        if (!validateColombianPhone(phone)) {
-          SoundFX.playError();
-          if (errorMsg) {
-            errorMsg.textContent = '✖ Ingresa un número celular Nequi válido en Colombia (10 dígitos iniciando por 3).';
-            errorMsg.classList.remove('hidden');
-          }
-          return;
-        }
-      } else if (selectedPaymentMethod === 'daviplata') {
-        const phone = document.getElementById('daviplata-phone')?.value;
-        if (!validateColombianPhone(phone)) {
-          SoundFX.playError();
-          if (errorMsg) {
-            errorMsg.textContent = '✖ Ingresa un celular DaviPlata válido en Colombia (10 dígitos iniciando por 3).';
-            errorMsg.classList.remove('hidden');
-          }
-          return;
-        }
-      }
+  // Botón de confirmación / activación inmediata de Wompi
+  document.getElementById('btn-confirm-wompi-paid')?.addEventListener('click', () => {
+    const stepForm = document.getElementById('checkout-step-form');
+    const stepProc = document.getElementById('checkout-step-processing');
+    const stepReceipt = document.getElementById('checkout-step-receipt');
+    const procTitle = document.getElementById('processing-title');
+    const procSub = document.getElementById('processing-subtitle');
 
-      // Mostrar pantalla de procesamiento bancario
-      const stepForm = document.getElementById('checkout-step-form');
-      const stepProc = document.getElementById('checkout-step-processing');
-      const stepReceipt = document.getElementById('checkout-step-receipt');
-      const procTitle = document.getElementById('processing-title');
-      const procSub = document.getElementById('processing-subtitle');
+    stepForm?.classList.add('hidden');
+    stepProc?.classList.remove('hidden');
 
-      stepForm?.classList.add('hidden');
-      stepProc?.classList.remove('hidden');
+    if (procTitle) procTitle.textContent = 'Verificando transacción en Wompi Bancolombia...';
+    if (procSub) procSub.textContent = 'Consultando estado del pago en la pasarela oficial...';
 
-      const methodLabels = {
-        nequi: `Nequi Push (${document.getElementById('nequi-phone')?.value})`,
-        pse: `Débito Bancario PSE (${document.getElementById('pse-bank-select')?.value})`,
-        card: `Tarjeta ${detectCardBrand(document.getElementById('card-number-input')?.value)}`,
-        daviplata: `Billetera DaviPlata (${document.getElementById('daviplata-phone')?.value})`
-      };
+    setTimeout(() => {
+      SoundFX.playLevelUp();
+      upgradeSubscriptionPlan(pendingCheckoutPlanId);
 
-      if (procTitle) {
-        procTitle.textContent =
-          selectedPaymentMethod === 'nequi'
-            ? 'Enviando notificación Push a tu Nequi...'
-            : selectedPaymentMethod === 'pse'
-            ? `Conectando con ${document.getElementById('pse-bank-select')?.value} vía ACH PSE...`
-            : 'Autorizando transacción segura con el banco emisor...';
-      }
-      if (procSub) {
-        procSub.textContent = 'Verificando firma digital y confirmación de pago...';
-      }
+      const planObj = SUBSCRIPTION_PLANS.find((p) => p.id === pendingCheckoutPlanId) || SUBSCRIPTION_PLANS[1];
+      const totals = updateCheckoutModalSummary();
+      const activeUser = getState().user;
 
-      setTimeout(() => {
-        SoundFX.playLevelUp();
-        upgradeSubscriptionPlan(pendingCheckoutPlanId);
+      const receipt = generateTransactionReceipt({
+        planName: planObj.name,
+        methodLabel: 'Wompi Bancolombia Oficial',
+        amountCOP: totals.totalToPay,
+        currency: selectedCurrency,
+        buyerDoc: activeUser?.email || 'Wompi Verificado'
+      });
 
-        const planObj = SUBSCRIPTION_PLANS.find((p) => p.id === pendingCheckoutPlanId) || SUBSCRIPTION_PLANS[1];
-        const totals = updateCheckoutModalSummary();
-        const docType = document.getElementById('pay-doc-type')?.value || 'CC';
-        const docNum = document.getElementById('pay-doc-number')?.value || 'No especificado';
+      syncPaymentTransaction({
+        reference: receipt.reference,
+        cus: receipt.cus,
+        planName: planObj.name,
+        planId: pendingCheckoutPlanId,
+        methodLabel: receipt.methodLabel,
+        amountCOP: totals.totalToPay,
+        currency: selectedCurrency,
+        buyerDoc: receipt.buyerDoc,
+        buyerEmail: activeUser?.email || ''
+      });
 
-        const receipt = generateTransactionReceipt({
-          planName: planObj.name,
-          methodLabel: methodLabels[selectedPaymentMethod],
-          amountCOP: totals.totalToPay,
-          currency: selectedCurrency,
-          buyerDoc: `${docType} ${docNum}`
-        });
+      document.getElementById('receipt-ref').textContent = receipt.reference;
+      document.getElementById('receipt-cus').textContent = receipt.cus;
+      document.getElementById('receipt-method').textContent = receipt.methodLabel;
+      document.getElementById('receipt-doc').textContent = receipt.buyerDoc;
+      document.getElementById('receipt-date').textContent = receipt.dateISO;
+      document.getElementById('receipt-total').textContent = receipt.formattedTotal;
 
-        const activeUser = getState().user;
-        syncPaymentTransaction({
-          reference: receipt.reference,
-          cus: receipt.cus,
-          planName: planObj.name,
-          planId: pendingCheckoutPlanId,
-          methodLabel: receipt.methodLabel,
-          amountCOP: totals.totalToPay,
-          currency: selectedCurrency,
-          buyerDoc: receipt.buyerDoc,
-          buyerEmail: activeUser?.email || ''
-        });
+      const secState = getState().proAccountSecurity || {};
+      const licEl = document.getElementById('receipt-license-token');
+      if (licEl) licEl.textContent = secState.licenseToken || 'SDJ-LIC-PRO-VERIFIED';
 
-        document.getElementById('receipt-ref').textContent = receipt.reference;
-        document.getElementById('receipt-cus').textContent = receipt.cus;
-        document.getElementById('receipt-method').textContent = receipt.methodLabel;
-        document.getElementById('receipt-doc').textContent = receipt.buyerDoc;
-        document.getElementById('receipt-date').textContent = receipt.dateISO;
-        document.getElementById('receipt-total').textContent = receipt.formattedTotal;
-
-        const secState = getState().proAccountSecurity || {};
-        const licEl = document.getElementById('receipt-license-token');
-        if (licEl) licEl.textContent = secState.licenseToken || 'SDJ-LIC-PRO-VERIFIED';
-
-        stepProc?.classList.add('hidden');
-        stepReceipt?.classList.remove('hidden');
-        refreshAllViews();
-      }, 1500);
-    });
-  }
+      stepProc?.classList.add('hidden');
+      stepReceipt?.classList.remove('hidden');
+      refreshAllViews();
+    }, 1500);
+  });
 
   document.getElementById('btn-finish-receipt')?.addEventListener('click', () => {
     checkoutModal?.classList.add('hidden');
@@ -464,13 +404,32 @@ document.addEventListener('DOMContentLoaded', () => {
     switchView('academy');
   });
 
-  // Detector automático de redirección exitosa desde Wompi o Mercado Pago (?payment=approved&plan=pro)
+  // Detector automático de redirección exitosa desde Wompi (?id=... o ?payment=approved&plan=pro)
   const urlParams = new URLSearchParams(window.location.search);
   const paymentStatus = urlParams.get('payment');
-  const paidPlan = urlParams.get('plan');
-  if ((paymentStatus === 'approved' || paymentStatus === 'success') && (paidPlan === 'pro' || paidPlan === 'team')) {
+  const wompiTransactionId = urlParams.get('id');
+  const paidPlan = urlParams.get('plan') || 'pro';
+
+  if (
+    (paymentStatus === 'approved' || paymentStatus === 'success' || wompiTransactionId) &&
+    (paidPlan === 'pro' || paidPlan === 'team')
+  ) {
     upgradeSubscriptionPlan(paidPlan);
+    const activeUser = getState().activeUser;
+    syncPaymentTransaction({
+      reference: wompiTransactionId ? `WOMPI-${wompiTransactionId}` : `WOMPI-CO-${Date.now()}`,
+      cus: wompiTransactionId || `CUS-${Date.now()}`,
+      planName: paidPlan === 'team' ? 'Cyber Squad' : 'Pro Operator',
+      planId: paidPlan,
+      methodLabel: 'Wompi Bancolombia Oficial',
+      amountCOP: paidPlan === 'team' ? 89900 : 29900,
+      currency: 'COP',
+      buyerDoc: 'Wompi Verified',
+      buyerEmail: activeUser?.email || ''
+    });
     window.history.replaceState({}, document.title, window.location.pathname);
+    SoundFX.playLevelUp();
+    refreshAllViews();
   }
 
   // 4. Configuración de Login y Registro

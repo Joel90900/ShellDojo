@@ -1485,16 +1485,16 @@
     </section>
 
     <!-- ==========================================
-         VISTA 6: PLANES DE PAGO & PASARELA COLOMBIA (WOMPI / MERCADO PAGO / PSE / NEQUI)
+         VISTA 6: PLANES DE PAGO & PASARELA OFICIAL WOMPI BANCOLOMBIA
          ========================================== -->
     <section id="view-pricing" class="view-section hidden space-y-8 py-4">
       <div class="text-center max-w-3xl mx-auto space-y-3">
         <span class="text-xs font-bold uppercase tracking-widest text-neonAmber">
-          🇨🇴 PAGOS NACIONALES E INTERNACIONALES // WOMPI BANCOLOMBIA &amp; MERCADO PAGO
+          🇨🇴 PASARELA OFICIAL // WOMPI BANCOLOMBIA
         </span>
         <h2 class="text-3xl font-bold text-white">Desbloquea todo el arsenal de ShellDojo</h2>
         <p class="text-sm text-slate-400">
-          Paga fácil en <strong>Pesos Colombianos (COP)</strong> con <strong>Nequi, PSE, Daviplata o Tarjeta</strong>, o en USD si estás fuera de Colombia.
+          Paga de forma 100% segura en <strong>Pesos Colombianos (COP)</strong> con <strong>Nequi, Botón Bancolombia, PSE o Tarjetas</strong> a través de Wompi Oficial.
         </p>
 
         <!-- Controles de Moneda (COP / USD) y Ciclo (Mensual / Anual -20%) -->
@@ -1532,8 +1532,8 @@
         <div class="flex items-center gap-3">
           <span class="text-2xl">🛡️</span>
           <div>
-            <strong class="text-white block">Pasarela Certificada PCI-DSS Nivel 1 (Wompi / Mercado Pago Colombia)</strong>
-            <span>Activación instantánea con Nequi, PSE (Todos los bancos en Colombia), Daviplata y Tarjetas Visa/Mastercard.</span>
+            <strong class="text-white block">Pasarela Oficial Certificada PCI-DSS Nivel 1 (Wompi Bancolombia)</strong>
+            <span>Pagos 100% seguros con Nequi, Botón Bancolombia, PSE (Todos los bancos de Colombia) y Tarjetas Débito / Crédito.</span>
           </div>
         </div>
         <div class="flex flex-wrap gap-2 shrink-0 font-bold text-[11px]">
@@ -1545,10 +1545,10 @@
       </div>
 
       <!-- ====================================================================
-           MODAL REALISTA DE PASARELA COLOMBIA (WOMPI / MERCADO PAGO / PSE)
+           MODAL EXCLUSIVO DE PASARELA OFICIAL (WOMPI BANCOLOMBIA)
            ==================================================================== -->
       <div id="checkout-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-crtPanel border-2 border-neonGreen rounded-xl max-w-2xl w-full p-6 space-y-5 shadow-neon-green my-8">
+        <div class="bg-crtPanel border-2 border-neonGreen rounded-xl max-w-xl w-full p-6 space-y-5 shadow-neon-green my-8">
           
           <!-- Cabecera de la Pasarela -->
           <div class="flex items-center justify-between border-b border-crtBorder pb-3">
@@ -1557,7 +1557,7 @@
                 <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-neonGreen/15 text-neonGreen border border-neonGreen/40">
                   🔒 CONEXIÓN CIFRADA TLS 1.3
                 </span>
-                <span class="text-[10px] text-slate-400">WOMPI BANCOLOMBIA • MERCADO PAGO CO</span>
+                <span class="text-[10px] text-slate-400">WOMPI BANCOLOMBIA OFICIAL</span>
               </div>
               <h3 id="checkout-plan-title" class="text-lg sm:text-xl font-bold text-white mt-1">
                 Suscripción Pro Operator
@@ -1568,33 +1568,8 @@
             </button>
           </div>
 
-          <!-- PASO 1: FORMULARIO DE PAGO MULTI-MÉTODO -->
+          <!-- PASO 1: DETALLES DE COMPRA Y CHECKOUT EXCLUSIVO WOMPI -->
           <div id="checkout-step-form" class="space-y-5">
-            
-            <!-- Pestañas de Método de Pago Colombiano -->
-            <div>
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-                1. Selecciona tu medio de pago en Colombia:
-              </label>
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-bold">
-                <button type="button" data-pay-method="nequi" class="pay-method-tab active-pay-method p-2.5 rounded-lg border border-neonGreen bg-neonGreen/15 text-neonGreen flex flex-col items-center gap-1 transition-all">
-                  <span>📱 Nequi</span>
-                  <span class="text-[10px] font-normal opacity-80">Notificación Push</span>
-                </button>
-                <button type="button" data-pay-method="pse" class="pay-method-tab p-2.5 rounded-lg border border-crtBorder bg-black text-slate-300 hover:text-white flex flex-col items-center gap-1 transition-all">
-                  <span>🏦 PSE</span>
-                  <span class="text-[10px] font-normal opacity-80">Débito Bancario</span>
-                </button>
-                <button type="button" data-pay-method="card" class="pay-method-tab p-2.5 rounded-lg border border-crtBorder bg-black text-slate-300 hover:text-white flex flex-col items-center gap-1 transition-all">
-                  <span>💳 Tarjeta</span>
-                  <span class="text-[10px] font-normal opacity-80">Crédito / Débito</span>
-                </button>
-                <button type="button" data-pay-method="daviplata" class="pay-method-tab p-2.5 rounded-lg border border-crtBorder bg-black text-slate-300 hover:text-white flex flex-col items-center gap-1 transition-all">
-                  <span>🔴 DaviPlata</span>
-                  <span class="text-[10px] font-normal opacity-80">Billetera Móvil</span>
-                </button>
-              </div>
-            </div>
 
             <!-- Cupón de Descuento + Resumen de Factura con IVA 19% -->
             <div class="grid grid-cols-1 md:grid-cols-12 gap-4 bg-black/60 border border-crtBorder rounded-lg p-4">
@@ -1606,7 +1581,7 @@
                   <input
                     id="checkout-coupon-input"
                     type="text"
-                    placeholder="Ej: Código de descuento"
+                    placeholder="Ej: DOJO20"
                     class="w-full bg-crtPanel border border-crtBorder focus:border-neonCyan rounded px-3 py-1.5 text-xs text-white uppercase focus:outline-none"
                   />
                   <button id="btn-apply-coupon" type="button" class="px-3 py-1.5 rounded bg-neonCyan/20 hover:bg-neonCyan text-neonCyan hover:text-black border border-neonCyan/40 font-bold text-xs transition-all shrink-0">
@@ -1639,137 +1614,42 @@
               </div>
             </div>
 
-            <!-- FORMULARIO DINÁMICO SEGÚN MÉTODO ELEGIDO -->
-            <form id="form-checkout" class="space-y-4" autocomplete="off">
-              
-              <!-- Datos Comunes de Facturación en Colombia (Cédula / NIT) -->
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label class="block text-[11px] text-slate-400 uppercase mb-1">Tipo Documento</label>
-                  <select id="pay-doc-type" class="w-full bg-black border border-crtBorder rounded px-3 py-2 text-xs text-white focus:outline-none">
-                    <option value="CC">CC - Cédula Ciudadanía</option>
-                    <option value="CE">CE - Cédula Extranjería</option>
-                    <option value="NIT">NIT - Empresa / RUT</option>
-                    <option value="TI">TI - Tarjeta Identidad</option>
-                  </select>
+            <!-- PASARELA OFICIAL EXCLUSIVA WOMPI BANCOLOMBIA -->
+            <div class="p-5 rounded-xl bg-gradient-to-r from-emerald-950/80 via-slate-900 to-black border-2 border-neonGreen shadow-neon-green space-y-4">
+              <div class="space-y-1.5">
+                <div class="flex items-center gap-2">
+                  <span class="inline-block w-2.5 h-2.5 rounded-full bg-neonGreen animate-pulse"></span>
+                  <span class="text-xs font-bold uppercase tracking-wider text-neonGreen">Medio de Pago Oficial: Wompi Bancolombia</span>
                 </div>
-                <div class="sm:col-span-2">
-                  <label class="block text-[11px] text-slate-400 uppercase mb-1">Número de Documento</label>
-                  <input
-                    id="pay-doc-number"
-                    type="text"
-                    required
-                    placeholder="Ej: 1020845912"
-                    class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-xs text-white focus:outline-none"
-                  />
-                </div>
+                <h4 class="text-base font-bold text-white">Transacción Oficial Protegida</h4>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  Tu suscripción se procesa directamente a través del portal de pagos seguro de <strong>Wompi Bancolombia</strong>. Acepta <strong>Nequi, Botón Bancolombia, PSE (todos los bancos de Colombia)</strong> y <strong>Tarjetas de Crédito / Débito</strong>.
+                </p>
               </div>
 
-              <!-- Sub-formulario 1: NEQUI -->
-              <div id="method-fields-nequi" class="method-panel bg-pink-500/5 border border-pink-500/30 rounded-lg p-4 space-y-3">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-pink-400">📱 Pago Rápido con Nequi Push</span>
-                  <span class="text-[10px] text-slate-400">Sin clave dinámica manual</span>
-                </div>
-                <div>
-                  <label class="block text-xs text-slate-300 mb-1">Número de Celular Nequi (10 dígitos en Colombia)</label>
-                  <input
-                    id="nequi-phone"
-                    type="tel"
-                    maxlength="10"
-                    placeholder="300 456 7890"
-                    class="w-full bg-black border border-crtBorder focus:border-pink-400 rounded px-3 py-2 text-sm text-white font-bold tracking-wider focus:outline-none"
-                  />
-                  <p class="text-[11px] text-slate-400 mt-1">
-                    Enviaremos una notificación de cobro a tu app Nequi para que la aceptes en un toque.
-                  </p>
-                </div>
+              <div class="space-y-2 pt-1">
+                <a
+                  id="btn-wompi-official-link"
+                  href="https://checkout.wompi.co/l/VPOS_amBAhi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="w-full py-4 px-4 rounded-lg bg-neonGreen text-black font-extrabold text-sm uppercase tracking-wider hover:bg-neonGreen/90 hover:scale-[1.01] transition-all text-center flex items-center justify-center gap-2 shadow-neon-green"
+                >
+                  <span>💳 Pagar Ahora con Wompi Oficial</span>
+                  <span class="text-base">&rarr;</span>
+                </a>
+
+                <button
+                  id="btn-confirm-wompi-paid"
+                  type="button"
+                  class="w-full py-2.5 px-4 rounded-lg bg-black text-slate-300 hover:text-neonGreen border border-crtBorder hover:border-neonGreen/60 text-xs font-bold uppercase tracking-wider transition-all"
+                >
+                  ⚡ ¿Ya completaste el pago en Wompi? Clic aquí para activar
+                </button>
               </div>
+            </div>
 
-              <!-- Sub-formulario 2: PSE (Bancos de Colombia) -->
-              <div id="method-fields-pse" class="method-panel hidden bg-neonCyan/5 border border-neonCyan/30 rounded-lg p-4 space-y-3">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-neonCyan">🏦 Débito Bancario PSE (ACH Colombia)</span>
-                  <span class="text-[10px] text-slate-400">Cuenta de Ahorros o Corriente</span>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label class="block text-xs text-slate-300 mb-1">Selecciona tu Banco</label>
-                    <select id="pse-bank-select" class="w-full bg-black border border-crtBorder focus:border-neonCyan rounded px-3 py-2 text-xs text-white focus:outline-none">
-                      <!-- Llenado dinámicamente con COLOMBIAN_BANKS_PSE -->
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-xs text-slate-300 mb-1">Tipo de Persona</label>
-                    <select id="pse-person-type" class="w-full bg-black border border-crtBorder focus:border-neonCyan rounded px-3 py-2 text-xs text-white focus:outline-none">
-                      <option value="natural">Persona Natural</option>
-                      <option value="juridica">Persona Jurídica (Empresa)</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Sub-formulario 3: TARJETA CRÉDITO / DÉBITO -->
-              <div id="method-fields-card" class="method-panel hidden bg-neonGreen/5 border border-neonGreen/30 rounded-lg p-4 space-y-3">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-neonGreen">💳 Tarjeta de Crédito o Débito con CVV</span>
-                  <span id="card-brand-badge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-black border border-crtBorder text-neonAmber">VISA</span>
-                </div>
-                <div>
-                  <label class="block text-xs text-slate-300 mb-1">Número de Tarjeta</label>
-                  <input
-                    id="card-number-input"
-                    type="text"
-                    maxlength="19"
-                    placeholder="0000 0000 0000 0000"
-                    class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3 py-2 text-sm text-white font-bold tracking-widest focus:outline-none"
-                  />
-                </div>
-                <div class="grid grid-cols-3 gap-3">
-                  <div>
-                    <label class="block text-[11px] text-slate-400 mb-1">Vencimiento</label>
-                    <input type="text" placeholder="MM/AA" class="w-full bg-black border border-crtBorder rounded px-3 py-2 text-xs text-white focus:outline-none" />
-                  </div>
-                  <div>
-                    <label class="block text-[11px] text-slate-400 mb-1">CVC / CVV</label>
-                    <input type="text" maxlength="4" placeholder="CVC" class="w-full bg-black border border-crtBorder rounded px-3 py-2 text-xs text-white focus:outline-none" />
-                  </div>
-                  <div>
-                    <label class="block text-[11px] text-slate-400 mb-1">Cuotas</label>
-                    <select class="w-full bg-black border border-crtBorder rounded px-2 py-2 text-xs text-white focus:outline-none">
-                      <option value="1">1 cuota (Sin interés)</option>
-                      <option value="3">3 cuotas</option>
-                      <option value="6">6 cuotas</option>
-                      <option value="12">12 cuotas</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Sub-formulario 4: DAVIPLATA -->
-              <div id="method-fields-daviplata" class="method-panel hidden bg-neonRed/5 border border-neonRed/30 rounded-lg p-4 space-y-3">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-neonRed">🔴 Billetera DaviPlata</span>
-                  <span class="text-[10px] text-slate-400">Confirmación por SMS / App</span>
-                </div>
-                <div>
-                  <label class="block text-xs text-slate-300 mb-1">Celular asociado a DaviPlata (10 dígitos)</label>
-                  <input
-                    id="daviplata-phone"
-                    type="tel"
-                    maxlength="10"
-                    placeholder="310 987 6543"
-                    class="w-full bg-black border border-crtBorder focus:border-neonRed rounded px-3 py-2 text-sm text-white font-bold tracking-wider focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div id="checkout-error-msg" class="hidden text-xs text-neonRed font-bold"></div>
-
-              <button id="btn-submit-payment" type="submit" class="w-full py-3.5 rounded-lg bg-neonGreen text-black font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-neonGreen/90 transition-all shadow-neon-green">
-                ⚡ Pagar Ahora y Desbloquear Licencia PRO
-              </button>
-            </form>
+            <div id="checkout-error-msg" class="hidden text-xs text-neonGreen font-medium bg-neonGreen/10 border border-neonGreen/40 p-3 rounded-lg"></div>
           </div>
 
           <!-- PASO 2: PANTALLA DE PROCESAMIENTO BANCARIO (SPINNER EN VIVO) -->
