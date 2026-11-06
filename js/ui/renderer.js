@@ -31,7 +31,8 @@ import {
   updateOperatorSettings,
   unlockShopItemWithXP,
   verifyProAccountSecurity,
-  recordDuelVictory
+  recordDuelVictory,
+  isAdminUser
 } from '../core/state.js';
 import { escapeHTML, maskSensitivePII } from '../core/security.js';
 import { validateCommand } from '../core/validator.js';
@@ -164,6 +165,13 @@ export function updateHUD() {
   }
   if (logoutBtn) logoutBtn.classList.toggle('hidden', !loggedIn);
 
+  const adminNavBtn = document.getElementById('nav-btn-admin-dashboard');
+  if (adminNavBtn) {
+    const showAdmin = loggedIn && (isAdminUser() || sessionStorage.getItem('sd_admin_session') === 'active');
+    adminNavBtn.classList.toggle('hidden', !showAdmin);
+    adminNavBtn.classList.toggle('flex', showAdmin);
+  }
+
   const planLabels = {
     free: 'CADET FREE',
     pro: 'PRO OPERATOR',
@@ -269,7 +277,8 @@ export function switchView(viewName) {
     'duel',
     'portfolio',
     'settings',
-    'feedback'
+    'feedback',
+    'admin-dashboard'
   ];
   views.forEach((v) => {
     const section = document.getElementById(`view-${v}`);
@@ -1377,6 +1386,15 @@ export function renderDuelArena(callbacks = {}) {
 function renderWaitingAloneView(container, data, callbacks) {
   const shareUrl = `${window.location.origin}${window.location.pathname}?duel=${encodeURIComponent(data.roomCode)}`;
 
+  const existingInput = container.querySelector('#input-join-room-code');
+  if (existingInput) {
+    const pCount = container.querySelector('#duel-display-player-count');
+    if (pCount) pCount.textContent = `${data.playerCount} / 2`;
+    const oCount = container.querySelector('#duel-display-total-online');
+    if (oCount) oCount.textContent = String(data.totalOnline);
+    return;
+  }
+
   container.innerHTML = `
     <div class="space-y-6">
       <div class="bg-crtPanel border-2 border-neonAmber/80 rounded-2xl p-6 sm:p-8 space-y-6 shadow-panel">
@@ -1399,10 +1417,10 @@ function renderWaitingAloneView(container, data, callbacks) {
 
           <div class="flex items-center gap-2">
             <span class="text-xs px-3 py-1.5 rounded-lg bg-black border border-crtBorder text-slate-300 font-mono">
-              👥 Operadores en sala: <strong class="text-neonAmber">${data.playerCount} / 2</strong>
+              👥 Operadores en sala: <strong id="duel-display-player-count" class="text-neonAmber">${data.playerCount} / 2</strong>
             </span>
             <span class="text-xs px-3 py-1.5 rounded-lg bg-black border border-crtBorder text-slate-300 font-mono">
-              🌐 En línea en ShellDojo: <strong class="text-neonCyan">${data.totalOnline}</strong>
+              🌐 En línea en ShellDojo: <strong id="duel-display-total-online" class="text-neonCyan">${data.totalOnline}</strong>
             </span>
           </div>
         </div>

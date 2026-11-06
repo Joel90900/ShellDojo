@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shelldojo-cache-v21.0';
+const CACHE_NAME = 'shelldojo-cache-v25.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -18,6 +18,7 @@ const ASSETS_TO_CACHE = [
   './js/ui/renderer.js',
   './js/ui/dojoController.js',
   './js/ui/arenaController.js',
+  './js/ui/adminDashboard.js',
   './assets/favicon.svg',
   './manifest.webmanifest'
 ];
@@ -47,7 +48,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   if (!event.request.url.startsWith('http://') && !event.request.url.startsWith('https://')) return;
-  if (event.request.url.includes('/api/') || event.request.url.includes('/admin/')) return;
+  if (event.request.url.includes('/api/') || event.request.url.includes('/admin')) return;
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const networkFetch = fetch(event.request)

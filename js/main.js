@@ -7,7 +7,8 @@
  * - Dashboard de Rutas, Modo Dojo, Panic Arena, Misiones Diarias y Diccionario
  */
 
-import { CURRICULUM_DATA, SUBSCRIPTION_PLANS } from './curriculum.js';import {
+import { CURRICULUM_DATA, SUBSCRIPTION_PLANS } from './data/curriculum.js';
+import {
   getState,
   isAuthenticated,
   hasProAccess,
@@ -18,7 +19,9 @@ import { CURRICULUM_DATA, SUBSCRIPTION_PLANS } from './curriculum.js';import {
   toggleAudioMute,
   resetAllProgress,
   registerIssuedCertificate,
-  calculateRank
+  calculateRank,
+  setAdminUserState,
+  isAdminUser
 } from './core/state.js';
 import { SoundFX } from './core/audio.js';
 import {
@@ -53,6 +56,13 @@ import {
 } from './ui/renderer.js';
 import { initDojoController, loadDojoLesson } from './ui/dojoController.js';
 import { initArenaController, startArenaSession, stopArenaTimer } from './ui/arenaController.js';
+import {
+  initAdminDashboard,
+  renderAdminDashboard,
+  isAdminLoggedIn,
+  performAdminLogin,
+  performAdminLogout
+} from './ui/adminDashboard.js';
 
 let pendingCheckoutPlanId = 'pro';
 let selectedCurrency = PAYMENT_GATEWAY_CONFIG.defaultCurrency; // 'COP' | 'USD'
@@ -132,6 +142,9 @@ document.addEventListener('DOMContentLoaded', () => {
     renderFeedbackView();
     renderCheatsheet(document.getElementById('cheatsheet-search-input')?.value || '', 'all');
     renderStudyTools();
+    if (isAdminUser() || isAdminLoggedIn()) {
+      renderAdminDashboard();
+    }
     refreshPricingView();
   };
 
@@ -469,10 +482,46 @@ document.addEventListener('DOMContentLoaded', () => {
   if (tabRegister) tabRegister.addEventListener('click', () => openAuthScreen('register'));
 
   if (formLogin) {
-    formLogin.addEventListener('submit', (e) => {
+    formLogin.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('login-email')?.value;
-      const password = document.getElementById('login-password')?.value;
+      const email = document.getElementById('login-email')?.value || '';
+      const password = document.getElementById('login-password')?.value || '';
+      const cleanEmail = String(email).trim().toLowerCase();
+
+      // Detección de Cuenta Maestra / Administrador Especial
+      const isAdminTarget =
+        cleanEmail === 'admin@admin.com' ||
+        cleanEmail === 'millermoncaleano112@gmail.com' ||
+        cleanEmail === 'soporteshelldojo@gmail.com' ||
+        cleanEmail === 'admin@shelldojo.io' ||
+        cleanEmail === 'admin';
+
+      if (isAdminTarget) {
+        try {
+          const adminRes = await performAdminLogin(cleanEmail, password);
+          if (adminRes.ok) {
+            setAdminUserState({
+              email: cleanEmail,
+              name: 'Miller Moncaleano (Admin)',
+              handle: 'joelmonca1'
+            });
+            SoundFX.playLevelUp();
+            refreshAllViews();
+            switchView('admin-dashboard');
+            renderAdminDashboard();
+            return;
+          } else {
+            SoundFX.playError();
+            if (authErrorBox) {
+              authErrorBox.textContent = adminRes.error || 'Credenciales de administrador incorrectas.';
+              authErrorBox.classList.remove('hidden');
+            }
+            return;
+          }
+        } catch (err) {
+          console.warn('Fallo en autenticación de administrador:', err);
+        }
+      }
 
       const res = loginUser({ email, password });
       if (!res.ok) {
@@ -486,7 +535,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       SoundFX.playSuccess();
       refreshAllViews();
-      switchView('academy');
+      if (isAdminUser()) {
+        switchView('admin-dashboard');
+        renderAdminDashboard();
+      } else {
+        switchView('academy');
+      }
     });
   }
 
@@ -569,8 +623,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  document.getElementById('btn-logout')?.addEventListener('click', () => {
+  document.getElementById('btn-logout')?.addEventListener('click', async () => {
     stopArenaTimer();
+    if (isAdminLoggedIn()) {
+      await performAdminLogout().catch(() => {});
+    }
     logoutUser();
     updateHUD();
     switchView('landing');
@@ -747,6 +804,9 @@ document.addEventListener('DOMContentLoaded', () => {
       ) {
         refreshAllViews();
       }
+      if (targetView === 'admin-dashboard') {
+        renderAdminDashboard();
+      }
       if (targetView === 'arena') {
         startArenaSession('global');
       }
@@ -867,6 +927,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Inicializar Centro de Control Administrativo
+  initAdminDashboard();
+
   refreshAllViews();
 
   // Sincronización automática bidireccional en tiempo real con la base de datos (store.json)
@@ -875,17 +938,21 @@ document.addEventListener('DOMContentLoaded', () => {
     syncAppStateWithBackend().then(() => refreshAllViews());
   });
 
-  // Si la URL incluye ?verify=SDJ-2026-XXXX o ?duel=XXXX, navegar directamente a esa vista
+  // Si la URL incluye ?verify=SDJ-2026-XXXX o ?duel=XXXX o ?view=admin, navegar directamente a esa vista
   const verifyParam = urlParams.get('verify');
   const duelParam = urlParams.get('duel');
+  const viewParam = urlParams.get('view');
   if (verifyParam) {
     renderCertificateVerifier(verifyParam);
     switchView('verify');
   } else if (duelParam) {
     renderDuelArena();
     switchView('duel');
+  } else if (viewParam === 'admin' && (isAdminUser() || isAdminLoggedIn())) {
+    switchView('admin-dashboard');
+    renderAdminDashboard();
   } else {
-    switchView(isAuthenticated() ? 'academy' : 'landing');
+    switchView(isAuthenticated() ? (isAdminUser() ? 'admin-dashboard' : 'academy') : 'landing');
   }
 
   // Atajo discreto para el Administrador: combinación oculta Ctrl+Alt+A

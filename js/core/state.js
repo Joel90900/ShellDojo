@@ -317,6 +317,26 @@ export function loginUser({ email, password }) {
   return { ok: true, user: appState.user };
 }
 
+export function setAdminUserState(adminUser = {}) {
+  appState.user = {
+    id: adminUser.id || 'admin-master',
+    name: adminUser.name || 'Miller Moncaleano (Admin)',
+    handle: adminUser.handle || 'admin',
+    email: adminUser.email || 'millermoncaleano112@gmail.com',
+    role: 'admin',
+    isAdmin: true,
+    plan: 'team',
+    xp: 9999
+  };
+  appState.plan = 'team';
+  saveState();
+  return { ok: true, user: appState.user };
+}
+
+export function isAdminUser() {
+  return Boolean(appState.user && (appState.user.isAdmin || appState.user.role === 'admin'));
+}
+
 export function logoutUser() {
   if (appState.user) {
     logSecurityEvent(`Cierre de sesión seguro de @${appState.user.handle}`, 'INFO');

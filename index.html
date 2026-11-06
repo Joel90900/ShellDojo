@@ -147,6 +147,9 @@
         <button data-nav="pricing" class="nav-tab px-2.5 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1 text-neonAmber">
           <span>💎</span> <span>Planes</span>
         </button>
+        <button id="nav-btn-admin-dashboard" data-nav="admin-dashboard" class="hidden nav-tab px-3 py-1.5 rounded text-xs font-bold transition-all flex items-center gap-1.5 text-neonAmber border border-neonAmber/60 bg-neonAmber/15 shadow-neon-amber">
+          <span>⚡</span> <span>Centro de Control</span>
+        </button>
       </nav>
 
       <!-- Estado del Jugador (HUD Derecha) -->
@@ -411,12 +414,12 @@
           <!-- FORMULARIO LOGIN -->
           <form id="form-login" class="space-y-4" autocomplete="off">
             <div>
-              <label class="block text-xs text-slate-400 uppercase mb-1">Correo del Operador</label>
+              <label class="block text-xs text-slate-400 uppercase mb-1">Correo o Usuario del Operador</label>
               <input
                 id="login-email"
-                type="email"
+                type="text"
                 required
-                placeholder="tucorreo@gmail.com"
+                placeholder="admin@admin.com o tucorreo@gmail.com"
                 class="w-full bg-black border border-crtBorder focus:border-neonGreen rounded px-3.5 py-2.5 text-sm text-white focus:outline-none"
               />
             </div>
@@ -1713,6 +1716,127 @@
         </div>
       </div>
     </section>
+
+    <!-- ====================================================================
+         VISTA ADMIN: CENTRO DE CONTROL INTEGRADO // PERMISOS COMPLETOS & CRUD
+         ==================================================================== -->
+    <section id="view-admin-dashboard" class="view-section hidden py-6 space-y-6">
+      <!-- Encabezado con Métricas Principales -->
+      <div class="p-6 rounded-2xl bg-gradient-to-r from-amber-950/40 via-black to-slate-950 border-2 border-neonAmber shadow-neon-amber space-y-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-crtBorder pb-4">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">⚡</span>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded bg-neonAmber/20 text-neonAmber border border-neonAmber/40">
+                  ACCESO ADMINISTRATIVO MAESTRO // CRUD COMPLETO
+                </span>
+                <span class="text-[10px] text-slate-400 bg-black/60 px-2 py-0.5 rounded border border-crtBorder">store.json en vivo</span>
+              </div>
+              <h2 class="text-2xl font-bold text-white mt-1">Centro de Control de ShellDojo</h2>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-admin-refresh" type="button" class="px-3.5 py-2 rounded-lg bg-black border border-crtBorder hover:border-neonAmber text-slate-300 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5">
+              <span>🔄</span> <span>Refrescar</span>
+            </button>
+            <button id="btn-admin-backup" type="button" class="px-3.5 py-2 rounded-lg bg-black border border-neonCyan/40 text-neonCyan hover:bg-neonCyan hover:text-black text-xs font-bold transition-all flex items-center gap-1.5 shadow-neon-cyan">
+              <span>💾</span> <span>Backup JSON</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tarjetas KPI -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
+          <div class="p-3.5 rounded-xl bg-black/60 border border-crtBorder">
+            <span class="text-slate-400 text-[11px] block">👥 Total Usuarios</span>
+            <strong id="admin-stat-users" class="text-lg font-bold text-white block mt-1">0</strong>
+          </div>
+          <div class="p-3.5 rounded-xl bg-black/60 border border-crtBorder">
+            <span class="text-slate-400 text-[11px] block">💳 Recaudado COP</span>
+            <strong id="admin-stat-revenue" class="text-lg font-bold text-neonGreen block mt-1">$0 COP</strong>
+          </div>
+          <div class="p-3.5 rounded-xl bg-black/60 border border-crtBorder">
+            <span class="text-slate-400 text-[11px] block">🧾 Pagos Aprobados</span>
+            <strong id="admin-stat-payments" class="text-lg font-bold text-white block mt-1">0</strong>
+          </div>
+          <div class="p-3.5 rounded-xl bg-black/60 border border-crtBorder">
+            <span class="text-slate-400 text-[11px] block">🎓 Certificados</span>
+            <strong id="admin-stat-certs" class="text-lg font-bold text-neonCyan block mt-1">0</strong>
+          </div>
+          <div class="p-3.5 rounded-xl bg-black/60 border border-crtBorder">
+            <span class="text-slate-400 text-[11px] block">💬 Opiniones Clientes</span>
+            <strong id="admin-stat-feedback" class="text-lg font-bold text-neonAmber block mt-1">0</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barra de Navegación por Pestañas del Admin -->
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-crtBorder pb-3">
+        <div class="flex flex-wrap items-center gap-1.5" id="admin-tabs-nav">
+          <button data-admin-tab="users" class="admin-tab active-tab px-3.5 py-2 rounded-lg text-xs font-bold transition-all bg-neonAmber text-black shadow-neon-amber">
+            👥 Usuarios
+          </button>
+          <button data-admin-tab="payments" class="admin-tab px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-black/60 border border-crtBorder hover:border-slate-500 transition-all">
+            💳 Pagos Wompi
+          </button>
+          <button data-admin-tab="certificates" class="admin-tab px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-black/60 border border-crtBorder hover:border-slate-500 transition-all">
+            🎓 Certificados
+          </button>
+          <button data-admin-tab="feedback" class="admin-tab px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-black/60 border border-crtBorder hover:border-slate-500 transition-all">
+            💬 Opiniones
+          </button>
+          <button data-admin-tab="stats" class="admin-tab px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-black/60 border border-crtBorder hover:border-slate-500 transition-all">
+            📊 Métricas
+          </button>
+          <button data-admin-tab="settings" class="admin-tab px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-black/60 border border-crtBorder hover:border-slate-500 transition-all">
+            ⚙️ Ajustes &amp; Correo
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2 w-full md:w-auto">
+          <input
+            id="admin-search-input"
+            type="text"
+            placeholder="🔍 Buscar en tabla..."
+            class="bg-black border border-crtBorder focus:border-neonAmber rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none w-full md:w-64"
+          />
+          <div id="admin-tab-actions" class="shrink-0"></div>
+        </div>
+      </div>
+
+      <!-- Contenedor Dinámico de la Pestaña Activa -->
+      <div id="admin-tab-content" class="min-h-[350px]">
+        <!-- Renderizado por adminDashboard.js -->
+      </div>
+    </section>
+
+    <!-- MODAL UNIVERSAL CRUD DEL ADMINISTRADOR -->
+    <div id="admin-crud-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div class="bg-crtPanel border-2 border-neonAmber rounded-xl max-w-lg w-full p-6 space-y-4 shadow-neon-amber my-8">
+        <div class="flex items-center justify-between border-b border-crtBorder pb-3">
+          <h3 id="admin-modal-title" class="text-base font-bold text-white flex items-center gap-2">
+            <span>⚙️</span> <span id="admin-modal-title-text">Crear Registro</span>
+          </h3>
+          <button id="admin-modal-close" type="button" class="text-slate-400 hover:text-white text-base font-bold px-2 py-1 rounded border border-transparent hover:border-crtBorder">
+            ✕
+          </button>
+        </div>
+        <form id="admin-crud-form" class="space-y-4" autocomplete="off">
+          <div id="admin-modal-fields" class="space-y-3 text-xs">
+            <!-- Campos dinámicos renderizados por adminDashboard.js -->
+          </div>
+          <div class="flex justify-end gap-2 pt-3 border-t border-crtBorder">
+            <button id="admin-modal-cancel" type="button" class="px-4 py-2 rounded bg-black border border-crtBorder text-slate-300 hover:text-white text-xs font-bold transition-all">
+              Cancelar
+            </button>
+            <button id="admin-modal-submit" type="submit" class="px-5 py-2 rounded bg-neonAmber text-black hover:bg-neonAmber/90 text-xs font-bold uppercase tracking-wider transition-all shadow-neon-amber">
+              Guardar Cambios
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <!-- ====================================================================
          MODAL GLOBAL DE CERTIFICADO OFICIAL SHELLDOJO (ENVÍO A GMAIL & PDF)
